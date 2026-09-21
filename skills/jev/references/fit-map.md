@@ -3,6 +3,14 @@
 Evidence snapshot: 2026-09-21, about a week after launch (2026-09-15). Most results are small
 experiments by early adopters. Re-check before quoting numbers as settled.
 
+**Every GOOD or HYBRID verdict you hand over ends with these two lines.** A verdict from this map is a
+claim about other people's data, so the reader needs to know how to prove it and what to do if it
+falls short:
+- **Prove it:** calibrate on labelled cases and report the held-out split (`calibration.md`).
+- **If accuracy is short:** name the lever to pull first (rewrite the question from its train misses,
+  multi-Jev, or a cascade on the unsure share; `optimization.md`), and say that any cascade accuracy
+  is reported together with the share escalated.
+
 ## Contents
 1. The one-line test
 2. Verdict rules

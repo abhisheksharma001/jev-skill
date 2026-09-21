@@ -123,7 +123,9 @@ code, not from questions.
 
 ## 7. Checklist before the first real call
 - [ ] Every question is one judgement, and its name is not needed to understand it
-- [ ] Every Noul has `criteria.true`/`criteria.false`; every Choice has `other`
+- [ ] Every Noul has `criteria.true`/`criteria.false`
+- [ ] Every Choice has an explicit `other` option, and any plan or PRD that lists the options lists
+      `other` with them (without it, input that fits no option is forced into a wrong one at high confidence)
 - [ ] Every Score level is described fully, without relying on its neighbours
 - [ ] No arithmetic, dates or counting inside questions; those values are precomputed into state
 - [ ] State is filtered, structured, with untrusted text in a labelled field
