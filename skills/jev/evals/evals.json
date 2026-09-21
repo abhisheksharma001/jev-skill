@@ -3,10 +3,10 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "ok so we have this support-bot repo at /Users/abhisheksharma/jev-skill/skills/jev-workspace/fixtures/support-bot \u2014 it handles like 40k tickets a day and our openai bill is ~$9k/month, mostly the classifier calls. someone told me TypeSafe's Jev model could cut that. can you look at the code and tell me exactly where jev would make sense, where it wouldn't, and how we'd roll it out without breaking anything? i'm not a hardcore dev so keep it clear. write it up as a plan.",
+      "prompt": "ok so we have this support-bot repo at <repo>/tests/fixtures/support-bot \u2014 it handles like 40k tickets a day and our openai bill is ~$9k/month, mostly the classifier calls. someone told me TypeSafe's Jev model could cut that. can you look at the code and tell me exactly where jev would make sense, where it wouldn't, and how we'd roll it out without breaking anything? i'm not a hardcore dev so keep it clear. write it up as a plan.",
       "expected_output": "A written plan that inspects the repo, assigns each LLM call to code / Jev / LLM, and gives a safe staged rollout with calibration.",
       "files": [
-        "fixtures/support-bot"
+        "tests/fixtures/support-bot"
       ],
       "assertions": [
         "Names classifyTicket and shouldEscalate as Jev candidates",
