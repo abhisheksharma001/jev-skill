@@ -1,0 +1,7 @@
+AGI_Research/
+.env
+*.env
+__pycache__/
+*-workspace/
+.DS_Store
+*.cache.jsonl

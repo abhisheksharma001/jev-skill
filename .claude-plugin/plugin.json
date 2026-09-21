@@ -1,0 +1,8 @@
+{
+  "name": "jev",
+  "version": "0.1.0",
+  "description": "Where TypeSafe AI's Jev decision model fits, and how to design, integrate, calibrate and ship it: fit check, brownfield scanner, calibration harness, PRD template.",
+  "author": { "name": "Abhishek Sharma" },
+  "license": "MIT",
+  "keywords": ["jev", "typesafe", "system-one", "decision-model", "llm-as-judge", "evals", "guardrails", "routing", "calibration"]
+}

@@ -1,0 +1,61 @@
+{
+  "skill_name": "jev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "ok so we have this support-bot repo at /Users/abhisheksharma/jev-skill/skills/jev-workspace/fixtures/support-bot \u2014 it handles like 40k tickets a day and our openai bill is ~$9k/month, mostly the classifier calls. someone told me TypeSafe's Jev model could cut that. can you look at the code and tell me exactly where jev would make sense, where it wouldn't, and how we'd roll it out without breaking anything? i'm not a hardcore dev so keep it clear. write it up as a plan.",
+      "expected_output": "A written plan that inspects the repo, assigns each LLM call to code / Jev / LLM, and gives a safe staged rollout with calibration.",
+      "files": [
+        "fixtures/support-bot"
+      ],
+      "assertions": [
+        "Names classifyTicket and shouldEscalate as Jev candidates",
+        "Keeps draftReply (text generation) on an LLM, not Jev",
+        "Moves refundEligible's date and amount checks into code instead of asking Jev",
+        "Splits gradeReply: the 1-5 score can go to Jev, the written explanation stays on an LLM or is made optional",
+        "Rollout runs Jev in shadow mode (beside the current call, acting only on the current call) before any cutover",
+        "Thresholds come from calibration on labelled cases with a held-out split; 0.5 is not shipped as a default",
+        "Pins a dated model id (jev-1.13.0) instead of jev-latest and mentions watching for version drift",
+        "Keeps the existing LLM as fallback for uncertain answers or outages, with a kill switch or flag",
+        "Addresses data/PII terms or redaction before ticket text is sent to TypeSafe",
+        "The ticket-category Choice question includes an explicit other/none option",
+        "Gives a cost estimate that uses Jev's $0.042 per 1M input tokens price"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "write a PRD for using Jev to QA our voice agent calls. we run Vapi voice agents for home-services clients, about 5k calls/day. after each call we want to flag: booking was missed (caller wanted to book but no appointment got made), caller asked for a human, and caller complained. today a gpt prompt does this on a 5% sample and it's inconsistent run to run. transcripts contain caller phone numbers and addresses. flagged calls go to a client-facing dashboard and 'asked for a human' also triggers an SMS to the client's office manager.",
+      "expected_output": "A complete PRD: fit verdict, question design, thresholds from calibration, PII handling, rollout, risks, verification.",
+      "files": [],
+      "assertions": [
+        "Missed-booking is decomposed into separate atomic questions (e.g. caller wanted to book; appointment was confirmed) combined in code",
+        "Yes/no questions carry explicit true/false criteria (what counts as yes and as no)",
+        "PII handling is specified: redaction or egress guard and/or terms clearance before transcripts are sent",
+        "The SMS-triggering asked-for-a-human path gets stricter handling than the dashboard-only flags (higher bar, confirmation step, or blind fallback)",
+        "Calibration plan has a labelled set with hard negatives, a held-out split, and success bars fixed before results",
+        "No threshold is set to 0.5 by default; thresholds are sourced from calibration",
+        "Pins a dated model version and monitors response.model for drift",
+        "Rollout includes a shadow phase with stated exit criteria",
+        "A fallback path exists for the uncertain band and for outages",
+        "States Jev price as $0.042 per 1M input tokens with a check date",
+        "Has a verification section with pass/fail checks (e.g. outage drill, flag-off behaviour unchanged)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "my cofounder wants to use jev for basically everything in our product. here's his list: (a) write the follow-up SMS after an abandoned call, (b) decide whether a contractor's invoice total exceeds the approved quote by more than 10%, (c) detect end-of-turn in our live voice agent so it stops interrupting people, (d) route inbound emails to one of 6 teams, (e) screen job applicants' resumes for our clients, (f) check whether our RAG bot's answer is actually supported by the retrieved docs. which of these should actually use jev? be straight with me.",
+      "expected_output": "A per-item verdict with reasons and evidence strength; correct owners (LLM / code / async-or-unknown / Jev / no / hybrid).",
+      "files": [],
+      "assertions": [
+        "(a) Follow-up SMS writing: not Jev, an LLM writes it (may split out a should-we-send decision)",
+        "(b) Invoice exceeds quote by >10%: plain code, not Jev",
+        "(c) Live end-of-turn detection: not inline; latency makes it unproven/async-only",
+        "(d) Email routing to 6 teams: good fit, with an explicit other option and calibration",
+        "(e) Resume screening: no, high-stakes/regulated with no fairness evidence",
+        "(f) RAG grounding: hybrid, fine for textual support but numeric/comparison claims go to code or an LLM",
+        "States how strong the evidence is for at least three items (independent vs partner vs none, or sample sizes)",
+        "Cites a measured latency figure for Jev when ruling on (c)"
+      ]
+    }
+  ]
+}
