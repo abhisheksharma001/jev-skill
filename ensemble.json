@@ -1,0 +1,17 @@
+{
+  "target": "y",
+  "model": "jev-1.13.0",
+  "mode": "choice",
+  "members": [
+    "c"
+  ],
+  "weights": {
+    "c": 0.0025000000000000005
+  },
+  "eval": {
+    "n": 9,
+    "weighted_acc": 0.0,
+    "best_member_acc": 0.0
+  },
+  "combine": "score[option] = sum(weights[m] * probabilities_m[option]); pick the max; margin = (top1 - top2) / sum(weights); low margin -> fallback"
+}
