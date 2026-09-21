@@ -45,6 +45,17 @@ Also: add "read the incumbent's output parsing for silent failures", hash-keyed 
 **Depends on:** S-5. **Files:** `docs/benchmarks/iteration-2/`, `README.md`.
 **Acceptance:** WHEN round 2 finishes THEN README SHALL show with-skill vs without-skill pass rates for the 4 tasks with the harder assertions.
 **Must not:** reuse round-1 grades.
+**Status:** done 2026-09-21. With skill 36/42, without 17/42, both on Sonnet, one run each. Learned: (1) the first attempt died on the session limit with half-written files, so partial outputs were deleted and all 8 runs redone; (2) the no-skill agent on task 4 reported 100% on the data it tuned on, which is the exact failure the train/eval split prevents; (3) the skill run still missed 6 checks, queued as S-8; (4) bug fixed here: `skills/jev/evals/evals.json` still held an absolute local path (an earlier "replaced" claim was wrong), now `<repo>/tests/fixtures/support-bot`.
 
 ### S-7 — Real-data benchmark (R-3)
 **Depends on:** data-terms clearance by Abhishek. **Must not:** send unredacted client transcripts.
+
+### S-8 — Close the six round-2 misses in the skill text
+**PR:** one. **Depends on:** S-6. **Research:** none.
+**Files:** `skills/jev/SKILL.md`, `skills/jev/references/integration.md`, `skills/jev/assets/prd-template.md`.
+**Today:** round-2 with-skill runs (a) gave no cost estimate, (b) wrote a brownfield plan with no held-out split or "never 0.5" line, (c) PRD 278 lines, (d) left SMS business hours as an open question, (e) no calibration step on a GOOD routing verdict, (f) no "which lever if accuracy is short" note on GOOD/HYBRID verdicts.
+**Change:** Working style: "give a cost estimate with stated assumptions rather than declining". Recipe A step 6: name the held-out split and the 0.5 rule. PRD template: 250-line budget stated at the top; alert rules section asks for a default business-hours policy. Fit assessment: every GOOD/HYBRID verdict ends with calibration plus the lever to pull if accuracy is short, reported with share escalated.
+**Acceptance:** WHEN round-3 evals run on the same 4 tasks THEN the with-skill side SHALL pass at least 40 of 42 checks.
+**Verify:** `python3 -m unittest discover -s tests`; rerun the 8 agents into iteration-3 and grade.
+**Must not:** edit the checks to fit the outputs.
+

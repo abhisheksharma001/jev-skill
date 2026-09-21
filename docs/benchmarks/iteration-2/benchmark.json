@@ -1,0 +1,635 @@
+{
+ "metadata": {
+  "skill_name": "jev",
+  "skill_path": "<path/to/skill>",
+  "executor_model": "claude-sonnet-5",
+  "analyzer_model": "<model-name>",
+  "timestamp": "2026-09-21T10:03:13Z",
+  "evals_run": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "runs_per_configuration": 1
+ },
+ "runs": [
+  {
+   "eval_id": 4,
+   "configuration": "with_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 1.0,
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "time_seconds": 1232.9,
+    "tokens": 137345,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Reads train-only failures via optimize_questions.py misses (does not inspect eval cases)",
+     "passed": true,
+     "evidence": "'read from the actual failing transcripts (train split only)'; used optimize_questions.py misses/compare"
+    },
+    {
+     "text": "Reports held-out accuracy before and after with n, thresholds fitted on train",
+     "passed": true,
+     "evidence": "eval (held out) n=44: 81.8% -> 97.7%; 'Threshold 0.76 (fitted on train)'"
+    },
+    {
+     "text": "Tries a multi-question ensemble or decomposition and reports whether it helped",
+     "passed": true,
+     "evidence": "4-question ensemble via ensemble.py: 100.0% (44/44); notes 'wanted' weight ~ -0.05 and most gain came from the rewrite"
+    },
+    {
+     "text": "Any cascade result states accuracy together with the share of calls escalated",
+     "passed": true,
+     "evidence": "3-way band 'auto-answers 36/44 held-out cases (82%) with zero wrong, leaving only 18% for a fallback'"
+    },
+    {
+     "text": "Says the dataset is synthetic and results are direction only",
+     "passed": true,
+     "evidence": "'n=44 held-out eval, single run, synthetic data'; 'very strong on a small test, not solved forever'"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 1,
+   "configuration": "with_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.86,
+    "passed": 12,
+    "failed": 2,
+    "total": 14,
+    "time_seconds": 281.0,
+    "tokens": 102703,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Names classifyTicket and shouldEscalate as Jev candidates",
+     "passed": true,
+     "evidence": "\"#1 \u2014 classify-ticket.ts \u2014 strong fit, do this first\" and \"#2 \u2014 should-escalate.ts \u2014 strong fit, but higher stakes \u2014 needs a stricter rollout\""
+    },
+    {
+     "text": "Keeps draftReply (text generation) on an LLM, not Jev",
+     "passed": true,
+     "evidence": "\"src/draft-reply.ts \u2014 leave this on the LLM, full stop ... Jev cannot generate text at all\""
+    },
+    {
+     "text": "Moves refundEligible's date and amount checks into code instead of asking Jev",
+     "passed": true,
+     "evidence": "Gives replacement function: \"return days <= 30 && amount <= 500 && !alreadyRefunded;\" with \"delete the model call and write it as code.\""
+    },
+    {
+     "text": "Splits gradeReply: the 1-5 score can go to Jev, the written explanation stays on an LLM or is made optional",
+     "passed": true,
+     "evidence": "\"The 1-5 score half of this ... is a good match for Jev's 'rating' question type\" and \"What has to stay on the LLM: the 'one-paragraph explanation for the coach' is writing, not a decision \u2014 that part cannot move to Jev.\""
+    },
+    {
+     "text": "Rollout runs Jev in shadow mode (beside the current call, acting only on the current call) before any cutover",
+     "passed": true,
+     "evidence": "\"Step 5 \u2014 shadow mode. In production, call Jev alongside the existing classifier on every ticket, log both answers, but keep acting only on the existing one.\""
+    },
+    {
+     "text": "Thresholds come from calibration on labelled cases with a held-out split; 0.5 is not shipped as a default",
+     "passed": false,
+     "evidence": "Steps 3-4 describe building a labelled set and measuring offline, but the plan never describes a held-out/test split distinct from tuning, and never states that a 0.5 default is being avoided."
+    },
+    {
+     "text": "Pins a dated model id (jev-1.13.0) instead of jev-latest and mentions watching for version drift",
+     "passed": true,
+     "evidence": "\"Step 7 \u2014 recalibrate ... Pin the exact model version (jev-1.13.0, not 'latest' \u2014 TypeSafe's own default alias moves over time), and re-check thresholds monthly or whenever that pinned version changes.\""
+    },
+    {
+     "text": "Keeps the existing LLM as fallback for uncertain answers or outages, with a kill switch or flag",
+     "passed": true,
+     "evidence": "\"Add a kill switch: if Jev errors out or times out, that ticket silently falls back to the existing OpenAI call\"; Step 1 adds a wrapper \"behind a flag that starts off\"; escalate's \"maybe yes\" and unsure cases \"still go to the same path as today.\""
+    },
+    {
+     "text": "Addresses data/PII terms or redaction before ticket text is sent to TypeSafe",
+     "passed": true,
+     "evidence": "\"Step 2 \u2014 clear it with someone who can say yes to data leaving the building ... a named person at Ellavox needs to read TypeSafe's current data terms and sign off.\""
+    },
+    {
+     "text": "The ticket-category Choice question includes an explicit other/none option",
+     "passed": true,
+     "evidence": "\"Always include an explicit 'none of these' option so an odd ticket doesn't get forced into the wrong bucket.\""
+    },
+    {
+     "text": "Gives a cost estimate that uses Jev's $0.042 per 1M input tokens price",
+     "passed": false,
+     "evidence": "Plan states the price ($0.042 per million) but explicitly declines to compute a cost estimate: \"No dollar figure for savings \u2014 I didn't invent one ... a real number needs your actual average ticket length, which lives in your logs.\""
+    },
+    {
+     "text": "Flags at least two fragile output-parsing bugs in the existing code (exact-match on \"true\", garbled reply defaulting to no, enum parse that throws)",
+     "passed": true,
+     "evidence": "Flags all three: \"Category.parse(...) throws if the model returns anything other than exactly one of the 6 words\"; \"startsWith(\\\"yes\\\") defaults to not escalating on anything that isn't a 'yes'-prefixed reply\"; \"same exact-match-defaults-to-false pattern\" in refund-eligibility.ts."
+    },
+    {
+     "text": "Ramp is percentage-based and keyed on a stable id hash so the same ticket always takes the same path",
+     "passed": true,
+     "evidence": "\"Route each ticket by a hash of its ticket ID: 5% \u2192 25% \u2192 50% \u2192 100% on Jev, so the same ticket always takes the same path\""
+    },
+    {
+     "text": "States that the '$9k is mostly classifiers' claim cannot be confirmed from the code and asks for the bill split by model",
+     "passed": true,
+     "evidence": "\"If your OpenAI dashboard breaks the $9k down by endpoint, it's worth confirming that 'mostly classifiers' really is where the money is\""
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 3,
+   "configuration": "with_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.78,
+    "passed": 7,
+    "failed": 2,
+    "total": 9,
+    "time_seconds": 172.1,
+    "tokens": 77496,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "(a) Follow-up SMS writing: not Jev, an LLM writes it (may split out a should-we-send decision)",
+     "passed": true,
+     "evidence": "\"Jev doesn't generate text ... this is off the table by definition\"; \"there's probably a hidden decision buried in this task worth pulling out separately \u2014 e.g. 'should we even send a follow-up?' ... those are closed-set questions Jev could answer cheaply ... But the writing itself stays on an LLM.\""
+    },
+    {
+     "text": "(b) Invoice exceeds quote by >10%: plain code, not Jev",
+     "passed": true,
+     "evidence": "\"This is (invoice_total - quote_total) / quote_total > 0.10. One line of code, deterministic, instant, free, and never wrong.\""
+    },
+    {
+     "text": "(c) Live end-of-turn detection: not inline; latency makes it unproven/async-only",
+     "passed": true,
+     "evidence": "\"Keep Jev out of the hard real-time path; run it async (post-turn, post-call) or speculatively ... measured Jev round trips are 0.33\u20130.9s in-region ... that alone can burn the entire turn budget\"; \"There's no measured case of Jev running inside a live turn successfully; it's proposals only.\""
+    },
+    {
+     "text": "(d) Email routing to 6 teams: good fit, with an explicit other option and calibration",
+     "passed": false,
+     "evidence": "Explicit 'other/unsure option in the Choice' is stated, but no calibration step is mentioned anywhere in the (d) section (only rules-first, other option, and injection testing are listed as guards)."
+    },
+    {
+     "text": "(e) Resume screening: no, high-stakes/regulated with no fairness evidence",
+     "passed": true,
+     "evidence": "fit-map cited as explicit BAD: \"High-stakes and regulated with no fairness audit\"; \"Jev showed a 69% preference for one of six equivalent options, and reordering four options ... flipped 7/120 answers \u2014 i.e., it has a demonstrated order/position bias\""
+    },
+    {
+     "text": "(f) RAG grounding: hybrid, fine for textual support but numeric/comparison claims go to code or an LLM",
+     "passed": true,
+     "evidence": "\"HYBRID \u2192 GOOD (textual)\"; \"The one hard exception: numeric-inference claims (e.g. 'the doc supports that the total is under $500') failed in the probe (0.26\u20130.36) \u2014 keep those out of Jev's lane and either compute them in code or leave them to your LLM.\""
+    },
+    {
+     "text": "States how strong the evidence is for at least three items (independent vs partner vs none, or sample sizes)",
+     "passed": true,
+     "evidence": "(d): \"an independent shadow run found ... partner-reported 5.43x faster, 96% cheaper\"; (e): \"7/120 answers\"; (f): \"this skill's own probe found ... n=27 ... An independent 32-case test was less clean\""
+    },
+    {
+     "text": "Cites a measured latency figure for Jev when ruling on (c)",
+     "passed": true,
+     "evidence": "\"measured Jev round trips are 0.33\u20130.9s in-region (1.9\u20132.4s from Japan)\""
+    },
+    {
+     "text": "For (d) and (f), names the lever to use if accuracy is short (rewrite from misses, multi-Jev, or margin-based cascade) and that accuracy must be reported with the share escalated",
+     "passed": false,
+     "evidence": "No mention anywhere of a specific lever (rewrite from misses, multi-Jev, or margin-based cascade) for (d) or (f), and no statement that accuracy must be reported alongside the share escalated."
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 2,
+   "configuration": "with_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.86,
+    "passed": 12,
+    "failed": 2,
+    "total": 14,
+    "time_seconds": 321.4,
+    "tokens": 111419,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Missed-booking is decomposed into separate atomic questions (e.g. caller wanted to book; appointment was confirmed) combined in code",
+     "passed": true,
+     "evidence": "Separate noul questions `wanted_booking` and `booking_confirmed_in_call`, composed in code: \"booking_missed = wanted_booking AND NOT (booking_confirmed_in_crm ?? booking_confirmed_in_call)\""
+    },
+    {
+     "text": "Yes/no questions carry explicit true/false criteria (what counts as yes and as no)",
+     "passed": true,
+     "evidence": "Questions table gives explicit criteria.true / criteria.false text for every noul, e.g. wants_human: \"true: 'Caller asked for a human...' / false: 'Caller did not ask...'\""
+    },
+    {
+     "text": "PII handling is specified: redaction or egress guard and/or terms clearance before transcripts are sent",
+     "passed": true,
+     "evidence": "\"Egress guard (the PII gate \u2014 applies in shadow mode too): a deterministic regex/NER pass strips phone numbers and street addresses from transcript[].text before state is built\" plus named-person data-terms sign-off requirement."
+    },
+    {
+     "text": "The SMS-triggering asked-for-a-human path gets stricter handling than the dashboard-only flags (higher bar, confirmation step, or blind fallback)",
+     "passed": true,
+     "evidence": "\"Blind fallback (fallback never sees Jev's answer) on: the SMS trigger only. The dashboard flags can use the plain confidence-floor cascade; the SMS ... gets the stricter bar\""
+    },
+    {
+     "text": "Calibration plan has a labelled set with hard negatives, a held-out split, and success bars fixed before results",
+     "passed": true,
+     "evidence": "Lists specific hard negatives (booking discussed but not confirmed, transfer connected mid-ask, sarcasm, etc.); \"Split: deterministic 70/30 by call id ... only eval-split numbers get published\"; \"Bars are written before results are seen, per this skill's calibration method.\""
+    },
+    {
+     "text": "No threshold is set to 0.5 by default; thresholds are sourced from calibration",
+     "passed": true,
+     "evidence": "\"Do not ship a 0.5 default; do not gate anything until calibrate.py prints eval-split TPR/TNR against these bars.\""
+    },
+    {
+     "text": "Pins a dated model version and monitors response.model for drift",
+     "passed": true,
+     "evidence": "\"Model pinned: jev-1.13.0 (not jev-latest). response.model is logged on every call and alerts on change; recalibrate whenever it moves.\""
+    },
+    {
+     "text": "Rollout includes a shadow phase with stated exit criteria",
+     "passed": true,
+     "evidence": "Rollout table, Phase 2 Shadow, exit criterion: \"\u2265 14 days; disagreement review done; bars still hold on real (redacted) data\""
+    },
+    {
+     "text": "A fallback path exists for the uncertain band and for outages",
+     "passed": true,
+     "evidence": "\"Middle band goes to the existing GPT prompt\" (uncertain) and \"a kill switch, and a circuit breaker after N consecutive failures that falls back to the existing GPT pipeline entirely \u2014 no user-visible gap\" (outage)."
+    },
+    {
+     "text": "States Jev price as $0.042 per 1M input tokens with a check date",
+     "passed": true,
+     "evidence": "Facts table: \"Price | $0.042 per 1M input tokens, output free | ... | Checked | 2026-09-21\""
+    },
+    {
+     "text": "Has a verification section with pass/fail checks (e.g. outage drill, flag-off behaviour unchanged)",
+     "passed": true,
+     "evidence": "Section 11 checklist: \"Flag off: dashboard/SMS behavior byte-identical to today's GPT-only pipeline\" and \"Outage drill: Jev key revoked mid-run, GPT fallback serves, no user-visible gap\""
+    },
+    {
+     "text": "Specifies alert-action rules for the SMS in code: rate limit per caller, business hours, and suppression when the transfer connected",
+     "passed": false,
+     "evidence": "Rate-limit (\"one alert per caller per 30 minutes\") and transfer suppression (\"suppress when transferred_to_human is already true\") are specified, but business-hours policy is left an open question: \"Rate-limit and business-hours policy for the office-manager SMS ... ?\" (\u00a712, not actually specified)."
+    },
+    {
+     "text": "Gates out voicemail/spam/wrong-number calls before computing flags",
+     "passed": true,
+     "evidence": "\"A code-side gate before the battery runs at all: skip voicemail, no-answer, and calls under ~10s ... it saves the call entirely\"; also \"the code gate (voicemail/spam/short calls) runs first regardless of model output\""
+    },
+    {
+     "text": "PRD body is under 250 lines",
+     "passed": false,
+     "evidence": "`wc -l with_skill/run-1/outputs/prd.md` = 278 lines, over the 250-line bar."
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 4,
+   "configuration": "without_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.4,
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "time_seconds": 690.4,
+    "tokens": 124387,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Reads train-only failures via optimize_questions.py misses (does not inspect eval cases)",
+     "passed": false,
+     "evidence": "No train/eval split; tuned criteria 'by reading the actual wrong transcripts in this same 160-call file'"
+    },
+    {
+     "text": "Reports held-out accuracy before and after with n, thresholds fitted on train",
+     "passed": false,
+     "evidence": "All accuracies are on the full 160 calls used for tuning; no held-out number, threshold not fitted on train"
+    },
+    {
+     "text": "Tries a multi-question ensemble or decomposition and reports whether it helped",
+     "passed": true,
+     "evidence": "v3 decomposed into 3 Nouls combined in code: 91.2%, then tuned to 100%; self-consistency reported as no gain"
+    },
+    {
+     "text": "Any cascade result states accuracy together with the share of calls escalated",
+     "passed": true,
+     "evidence": "No cascade result presented, so nothing reported without its escalation share (vacuous pass)"
+    },
+    {
+     "text": "Says the dataset is synthetic and results are direction only",
+     "passed": false,
+     "evidence": "Says 100% is 'optimistic' but never says the dataset is synthetic"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 1,
+   "configuration": "without_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.57,
+    "passed": 8,
+    "failed": 6,
+    "total": 14,
+    "time_seconds": 242.8,
+    "tokens": 80401,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Names classifyTicket and shouldEscalate as Jev candidates",
+     "passed": true,
+     "evidence": "\"classify-ticket.ts \u2014 strong candidate, your #1 target\" and \"should-escalate.ts \u2014 candidate, but treat as higher-stakes\""
+    },
+    {
+     "text": "Keeps draftReply (text generation) on an LLM, not Jev",
+     "passed": true,
+     "evidence": "\"draft-reply.ts \u2014 no. Jev cannot generate text at all, full stop. This has to stay on a real LLM.\""
+    },
+    {
+     "text": "Moves refundEligible's date and amount checks into code instead of asking Jev",
+     "passed": true,
+     "evidence": "Gives replacement function: \"return days <= 30 && amount <= 500 && !alreadyRefunded;\" and \"This should never have been an LLM call in the first place.\""
+    },
+    {
+     "text": "Splits gradeReply: the 1-5 score can go to Jev, the written explanation stays on an LLM or is made optional",
+     "passed": true,
+     "evidence": "\"You could get the 1\u20135 score from Jev's 'Score' type, but you'd still need a second LLM call for the explanation \u2014 two calls instead of one.\""
+    },
+    {
+     "text": "Rollout runs Jev in shadow mode (beside the current call, acting only on the current call) before any cutover",
+     "passed": true,
+     "evidence": "\"Step 1 \u2014 Shadow mode. Add a second, silent call to Jev right next to classify-ticket.ts and should-escalate.ts. Log what Jev says, but keep using the existing gpt-5.4-mini output for every real decision.\""
+    },
+    {
+     "text": "Thresholds come from calibration on labelled cases with a held-out split; 0.5 is not shipped as a default",
+     "passed": false,
+     "evidence": "Describes a labelled set (Step 0) and confidence-gated rollout (Step 3), but never mentions a held-out/test split separate from tuning, nor addresses avoiding a 0.5 default."
+    },
+    {
+     "text": "Pins a dated model id (jev-1.13.0) instead of jev-latest and mentions watching for version drift",
+     "passed": false,
+     "evidence": "No mention anywhere in the document of pinning a specific dated model version (e.g. jev-1.13.0) or of jev-latest/version drift at all."
+    },
+    {
+     "text": "Keeps the existing LLM as fallback for uncertain answers or outages, with a kill switch or flag",
+     "passed": true,
+     "evidence": "\"Step 6 \u2014 Keep the OpenAI fallback wired up, even after full rollout ... keep it as an automatic fallback if Jev errors, times out, or gets rate-limited\"; Step 3 routes below-threshold (uncertain) cases to the existing call."
+    },
+    {
+     "text": "Addresses data/PII terms or redaction before ticket text is sent to TypeSafe",
+     "passed": true,
+     "evidence": "\"Step 7 \u2014 Get data handling in writing before sending real tickets ... that needs to be a signed agreement (DPA), not just a request flag, before real customer emails go through a brand-new third-party vendor.\""
+    },
+    {
+     "text": "The ticket-category Choice question includes an explicit other/none option",
+     "passed": false,
+     "evidence": "No mention anywhere of adding an explicit 'other' or 'none of these' option to the 6-category classification."
+    },
+    {
+     "text": "Gives a cost estimate that uses Jev's $0.042 per 1M input tokens price",
+     "passed": false,
+     "evidence": "Explicitly declines to give one: \"I can't tell you the exact dollar savings without your real per-call token counts from the OpenAI dashboard\" \u2014 only directional multipliers (\"40-100x lower cost\") are given, no dollar figure computed from $0.042."
+    },
+    {
+     "text": "Flags at least two fragile output-parsing bugs in the existing code (exact-match on \"true\", garbled reply defaulting to no, enum parse that throws)",
+     "passed": false,
+     "evidence": "No mention anywhere of the specific parsing bugs (exact-match on \"true\", startsWith(\"yes\") defaulting to no, or the zod enum parse throwing)."
+    },
+    {
+     "text": "Ramp is percentage-based and keyed on a stable id hash so the same ticket always takes the same path",
+     "passed": false,
+     "evidence": "\"Step 5 \u2014 Ramp gradually. 5% of live traffic \u2192 25% \u2192 100%\" is percentage-based but never mentions keying the ramp on a ticket-id hash for path stability."
+    },
+    {
+     "text": "States that the '$9k is mostly classifiers' claim cannot be confirmed from the code and asks for the bill split by model",
+     "passed": true,
+     "evidence": "\"Also pull your real OpenAI billing breakdown by endpoint/model to confirm classify + escalate really are the dominant cost lines (the README says so \u2014 worth confirming with actual numbers before investing engineering time).\""
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 3,
+   "configuration": "without_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.22,
+    "passed": 2,
+    "failed": 7,
+    "total": 9,
+    "time_seconds": 135.9,
+    "tokens": 67902,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "(a) Follow-up SMS writing: not Jev, an LLM writes it (may split out a should-we-send decision)",
+     "passed": true,
+     "evidence": "\"You need a real LLM (or an LLM writing from templates) for this one, full stop. Where Jev could help in this flow: deciding which template/tone bucket to use ... or classifying urgency\""
+    },
+    {
+     "text": "(b) Invoice exceeds quote by >10%: plain code, not Jev",
+     "passed": true,
+     "evidence": "\"It's invoice_total > quote_total * 1.10 \u2014 one line of code, or one spreadsheet formula. Don't spend a Jev call (or any model call) on arithmetic you can already compute deterministically.\""
+    },
+    {
+     "text": "(c) Live end-of-turn detection: not inline; latency makes it unproven/async-only",
+     "passed": false,
+     "evidence": "Reasoning is entirely about modality, not latency: \"Jev takes text or structured JSON as input \u2014 it doesn't listen to audio.\" No latency figure or async/unproven-due-to-speed argument is made for (c)."
+    },
+    {
+     "text": "(d) Email routing to 6 teams: good fit, with an explicit other option and calibration",
+     "passed": false,
+     "evidence": "Mentions routing uncertain emails to a \"human triage queue\" via confidence score, but never adds an explicit 'other' option to the 6-team schema, and never mentions calibration."
+    },
+    {
+     "text": "(e) Resume screening: no, high-stakes/regulated with no fairness evidence",
+     "passed": false,
+     "evidence": "Argues from lack of rationale/explainability and general regulatory exposure (NYC Local Law 144, EU AI Act, EEOC) but never addresses whether there is (or isn't) fairness/bias evidence for Jev specifically."
+    },
+    {
+     "text": "(f) RAG grounding: hybrid, fine for textual support but numeric/comparison claims go to code or an LLM",
+     "passed": false,
+     "evidence": "Treats \"supported / not supported / partially supported\" as one uniform bounded classification with no carve-out for numeric/comparison claims; no mention of numeric claims needing code or an LLM."
+    },
+    {
+     "text": "States how strong the evidence is for at least three items (independent vs partner vs none, or sample sizes)",
+     "passed": false,
+     "evidence": "No source-strength language anywhere in the document \u2014 no use of 'independent,' 'partner,' 'n=', or any sample size."
+    },
+    {
+     "text": "Cites a measured latency figure for Jev when ruling on (c)",
+     "passed": false,
+     "evidence": "Only a generic vendor range (\"~70-500ms\") appears in the general intro (line 3), disconnected from the (c) section, which cites no latency figure at all."
+    },
+    {
+     "text": "For (d) and (f), names the lever to use if accuracy is short (rewrite from misses, multi-Jev, or margin-based cascade) and that accuracy must be reported with the share escalated",
+     "passed": false,
+     "evidence": "No mention anywhere of rewrite-from-misses, multi-Jev, or margin-based cascade, and no statement that accuracy must be reported with the share escalated."
+    }
+   ],
+   "notes": []
+  },
+  {
+   "eval_id": 2,
+   "configuration": "without_skill",
+   "run_number": 1,
+   "result": {
+    "pass_rate": 0.36,
+    "passed": 5,
+    "failed": 9,
+    "total": 14,
+    "time_seconds": 143.9,
+    "tokens": 66018,
+    "tool_calls": 0,
+    "errors": 0
+   },
+   "expectations": [
+    {
+     "text": "Missed-booking is decomposed into separate atomic questions (e.g. caller wanted to book; appointment was confirmed) combined in code",
+     "passed": false,
+     "evidence": "\"Booking Missed\" is a single compound criterion (\"true if: the caller expressed clear intent to schedule ... AND the call ended without an appointment being created\") sent as one Jev question, not two separate questions composed in code."
+    },
+    {
+     "text": "Yes/no questions carry explicit true/false criteria (what counts as yes and as no)",
+     "passed": true,
+     "evidence": "\u00a75.1 gives explicit true/false criteria for each flag, e.g. Booking Missed \"true if...\" / \"false if...\""
+    },
+    {
+     "text": "PII handling is specified: redaction or egress guard and/or terms clearance before transcripts are sent",
+     "passed": true,
+     "evidence": "\"default to redacting/masking phone numbers and street addresses in the transcript text before it's sent to Jev\" and confirmation of TypeSafe's data terms/DPA required before launch (\u00a76)."
+    },
+    {
+     "text": "The SMS-triggering asked-for-a-human path gets stricter handling than the dashboard-only flags (higher bar, confirmation step, or blind fallback)",
+     "passed": false,
+     "evidence": "Both dashboard flags and the SMS trigger use the same generic \"above threshold\" language in \u00a75.2 steps 6-7; no differentiated bar, confirmation step, or blind fallback is described for the SMS path specifically."
+    },
+    {
+     "text": "Calibration plan has a labelled set with hard negatives, a held-out split, and success bars fixed before results",
+     "passed": false,
+     "evidence": "\u00a77 describes a 300-500 call stratified labelled set, but never mentions hard negatives, a held-out/eval split, or bars set before results are seen."
+    },
+    {
+     "text": "No threshold is set to 0.5 by default; thresholds are sourced from calibration",
+     "passed": true,
+     "evidence": "\"Confidence threshold defaults \u2014 set after Phase 0/1 data, not guessed upfront.\" (\u00a711)"
+    },
+    {
+     "text": "Pins a dated model version and monitors response.model for drift",
+     "passed": false,
+     "evidence": "Only mentions logging \"model version\" as a data field (\u00a75.2 step 5); no mention of pinning a specific dated version (e.g. jev-1.13.0) or of jev-latest / drift monitoring anywhere."
+    },
+    {
+     "text": "Rollout includes a shadow phase with stated exit criteria",
+     "passed": true,
+     "evidence": "\"Phase 1 \u2014 Shadow mode. ... Go/no-go gate: Jev must meet or beat current GPT-sample precision/recall, and materially improve run-to-run consistency.\""
+    },
+    {
+     "text": "A fallback path exists for the uncertain band and for outages",
+     "passed": false,
+     "evidence": "Low-confidence band has an escalation path (\u00a77.4), but no outage/API-failure fallback for Jev itself is described, and Phase 3 explicitly \"decommission[s] the 5%-sample GPT prompt\" \u2014 the only fallback mentioned is scoped to \"Phase 1-2\" only."
+    },
+    {
+     "text": "States Jev price as $0.042 per 1M input tokens with a check date",
+     "passed": false,
+     "evidence": "No specific price figure appears anywhere in the document; only a vague \"~40-200x lower cost than typical frontier LLMs\" claim in \u00a73, with no $0.042 figure or check date."
+    },
+    {
+     "text": "Has a verification section with pass/fail checks (e.g. outage drill, flag-off behaviour unchanged)",
+     "passed": false,
+     "evidence": "No verification/checklist section exists anywhere in the document."
+    },
+    {
+     "text": "Specifies alert-action rules for the SMS in code: rate limit per caller, business hours, and suppression when the transfer connected",
+     "passed": false,
+     "evidence": "\u00a75.3 covers content and retry-on-failure but specifies no rate limit, business-hours rule, or suppression-on-transfer-connected logic."
+    },
+    {
+     "text": "Gates out voicemail/spam/wrong-number calls before computing flags",
+     "passed": false,
+     "evidence": "Voicemail is only excluded from the Booking Missed flag's own definition (\"Excluded from this flag: voicemails / calls with no live conversation\", \u00a75.1) rather than gated out generally before all flags are computed; spam/wrong-number are not addressed as a pre-filter at all."
+    },
+    {
+     "text": "PRD body is under 250 lines",
+     "passed": true,
+     "evidence": "`wc -l without_skill/run-1/outputs/prd.md` = 170 lines, under the 250-line bar."
+    }
+   ],
+   "notes": []
+  }
+ ],
+ "run_summary": {
+  "with_skill": {
+   "pass_rate": {
+    "mean": 0.875,
+    "stddev": 0.0915,
+    "min": 0.78,
+    "max": 1.0
+   },
+   "time_seconds": {
+    "mean": 501.85,
+    "stddev": 491.4286,
+    "min": 172.1,
+    "max": 1232.9
+   },
+   "tokens": {
+    "mean": 107240.75,
+    "stddev": 24691.8675,
+    "min": 77496,
+    "max": 137345
+   }
+  },
+  "without_skill": {
+   "pass_rate": {
+    "mean": 0.3875,
+    "stddev": 0.1441,
+    "min": 0.22,
+    "max": 0.57
+   },
+   "time_seconds": {
+    "mean": 303.25,
+    "stddev": 262.639,
+    "min": 135.9,
+    "max": 690.4
+   },
+   "tokens": {
+    "mean": 84677.0,
+    "stddev": 27231.8881,
+    "min": 66018,
+    "max": 124387
+   }
+  },
+  "delta": {
+   "pass_rate": "+0.49",
+   "time_seconds": "+198.6",
+   "tokens": "+22564"
+  }
+ },
+ "notes": [
+  "Single run per config; Sonnet for both sides. Assertion totals: with skill 36/42, without 17/42.",
+  "Eval 4 baseline reported 100% but on the same 160 calls it tuned on (no held-out split); the skill run reported 100% on a 44-case held-out split.",
+  "With-skill misses: no cost estimate and no held-out/0.5 language in the brownfield plan; PRD 278 lines (limit 250) and no business-hours rule; triage answer lacked calibration for routing and the lever/share-escalated note.",
+  "Time and tokens are higher with the skill (+199s, +22.6k tokens on average), driven by eval 4's live calibration runs."
+ ]
+}

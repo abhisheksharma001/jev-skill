@@ -48,7 +48,42 @@ about $0.12 of Jev calls.
 
 ## Does the skill change what an agent produces?
 
-Round 1: three realistic tasks, each run once by the same agent with and without the skill, graded
+### Round 2 (harder checks, weaker agent)
+
+Four realistic tasks, each run once with and without the skill, both sides on Claude Sonnet, graded by a
+separate agent against 42 written checks. The checks were made harder after round 1, and task 4 is
+new: close an accuracy gap on 160 labelled calls with live Jev calls.
+
+| Task | With skill | Without skill |
+|---|---|---|
+| 1. Plan for an existing support-bot repo | 12 / 14 | 8 / 14 |
+| 2. PRD for voice-call QA | 12 / 14 | 5 / 14 |
+| 3. Six proposed uses, which should use Jev | 7 / 9 | 2 / 9 |
+| 4. Close the accuracy gap, show numbers | 5 / 5 | 2 / 5 |
+| **Total** | **36 / 42 (86%)** | 17 / 42 (40%) |
+| Time per task | 502 s | 303 s |
+| Tokens per task | 107k | 85k |
+
+![Round 2 benchmark tab](docs/benchmarks/iteration-2/benchmark-viewer.png)
+
+The clearest difference was task 4. Without the skill the agent reported 100%, measured on the same
+160 calls it had tuned its wording on. With the skill it split the data first, read train failures
+only, and reported 81.8% to 97.7% (rewrite) to 100% (four-question ensemble) on 44 held-out calls,
+with the threshold fitted on train.
+
+What the skill run still got wrong (open work, not hidden):
+- Task 1: no held-out split or "never 0.5" language, and it refused to give a cost estimate instead
+  of giving one with stated assumptions.
+- Task 2: the PRD was 278 lines (limit 250) and left the business-hours rule for the SMS as an open question.
+- Task 3: no calibration step for email routing, and no "which lever if accuracy is short" note.
+
+Read this with care: one run per cell, the skill costs more time and tokens (task 4 took 20 minutes
+with live calibration), one check on the no-skill side of task 4 passed only because no cascade was
+presented, and the same author wrote both the skill and the checks. Raw data: [`docs/benchmarks/iteration-2/`](docs/benchmarks/iteration-2/).
+
+### Round 1
+
+Three realistic tasks, each run once by the same agent with and without the skill, graded
 blind by a separate agent against 30 written checks.
 
 | | With skill | Without skill |
