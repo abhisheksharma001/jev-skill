@@ -48,6 +48,41 @@ about $0.12 of Jev calls.
 
 ## Does the skill change what an agent produces?
 
+### Round 3 (same tasks and checks, after fixing the round-2 misses)
+
+The skill text was changed in four places to close the six round-2 misses. The 42 checks were not
+touched. Same setup as round 2: one run per cell, both sides on Claude Sonnet, separate grader.
+
+| Task | With skill | Without skill |
+|---|---|---|
+| 1. Plan for an existing support-bot repo | 13 / 14 | 6 / 14 |
+| 2. PRD for voice-call QA | 14 / 14 | 4 / 14 |
+| 3. Six proposed uses, which should use Jev | 8 / 9 | 3 / 9 |
+| 4. Close the accuracy gap, show numbers | 5 / 5 | 2 / 5 |
+| **Total** | **40 / 42 (95%)** | 15 / 42 (36%) |
+| Time per task | 508 s | 395 s |
+| Tokens per task | 124k | 92k |
+
+![Round 3 benchmark tab](docs/benchmarks/iteration-3/benchmark-viewer.png)
+
+- Five of the six round-2 misses are closed: the plan now gives a cost estimate with stated
+  assumptions and names the held-out split and the 0.5 rule; the PRD is 187 lines and writes a
+  default business-hours rule; the routing verdict carries a calibration step.
+- Still open: task 3 again gave no "which lever if accuracy is short, reported with share escalated"
+  note, although the skill now asks for it. New miss: task 1 left the explicit `other` option off
+  the ticket-category question, which round 2 had passed. With one run per cell, a one-check swing
+  like this is inside the noise.
+- Task 4 repeated the round-2 pattern. With the skill: 75.0% to 97.7% on 44 held-out calls
+  (synthetic data), four questions in one call with weights fitted on train; two rewrites were tried
+  and reported as not helping. Without the skill: 79.4% to 97.5%, measured on the same 160 calls
+  used for tuning, which the agent said itself.
+
+Read this with care: 40 is exactly the bar set before the run, so there is no margin. One run per
+cell. The task-4 cascade check passed on the skill side only because no cascade was needed or shown.
+One no-skill grade was changed by the author from fail to pass, because the grader had failed it on a
+ground the check does not state. Same author wrote the skill and the checks.
+Raw data: [`docs/benchmarks/iteration-3/`](docs/benchmarks/iteration-3/).
+
 ### Round 2 (harder checks, weaker agent)
 
 Four realistic tasks, each run once with and without the skill, both sides on Claude Sonnet, graded by a
