@@ -69,6 +69,13 @@ data and the latency budget are the usual unknowns). Then place the task in `ref
 and tell the user the verdict **and how strong the evidence is**. Many placements are UNKNOWN
 (proposals only). For those, the honest answer is "run a shadow experiment", not yes or no.
 
+A GOOD or HYBRID verdict is a claim that still has to be proved on the user's data, so never end
+one at "good fit". Close each with two lines:
+- **Prove it:** calibrate on labelled cases and report the held-out split (`references/calibration.md`).
+- **If accuracy is short:** name the lever to pull first (rewrite the question from its train misses,
+  multi-Jev, or a cascade on the unsure share; `references/optimization.md`), and say that any
+  cascade number is reported together with the share escalated.
+
 Where Jev pays off most: an LLM already making a decision, at high volume, with several independent
 questions about the same input, where consistency or a usable probability matters and mistakes are
 reversible. The strongest shape is a **pre-filter or cascade in front of an expensive model**.
@@ -184,6 +191,15 @@ about one state go in one call, because state is billed once and question count 
   - Report these even though nobody asked.
 - **Keep deliverables short.**
   - A PRD or plan the reader finishes beats a complete one they skim.
+  - Budget: 250 lines for a PRD. Count before handing over (`wc -l`), and cut until it fits.
   - Cut any section that restates another.
+- **Estimate instead of declining.**
+  - When asked what it will cost or save, give a number with the assumptions written next to it
+    (calls per day x tokens per call x $0.042 per 1M input tokens, with the check date).
+  - Missing inputs become stated assumptions plus "send me X to tighten this", not a refusal. A
+    reader can correct a wrong assumption; they cannot act on "it depends".
+- **Decide defaults; do not park them as open questions.**
+  - For a rule the user did not specify (business hours, rate limits, retention), write a sensible
+    default into the design and list only "confirm the default" as the open item.
 - **Report honestly.** Give eval-split numbers with n, say whether data is synthetic or real, say
   what was not tested, and compare with the incumbent on the same cases.
