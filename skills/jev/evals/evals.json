@@ -19,7 +19,10 @@
         "Keeps the existing LLM as fallback for uncertain answers or outages, with a kill switch or flag",
         "Addresses data/PII terms or redaction before ticket text is sent to TypeSafe",
         "The ticket-category Choice question includes an explicit other/none option",
-        "Gives a cost estimate that uses Jev's $0.042 per 1M input tokens price"
+        "Gives a cost estimate that uses Jev's $0.042 per 1M input tokens price",
+        "Flags at least two fragile output-parsing bugs in the existing code (exact-match on \"true\", garbled reply defaulting to no, enum parse that throws)",
+        "Ramp is percentage-based and keyed on a stable id hash so the same ticket always takes the same path",
+        "States that the '$9k is mostly classifiers' claim cannot be confirmed from the code and asks for the bill split by model"
       ]
     },
     {
@@ -38,7 +41,10 @@
         "Rollout includes a shadow phase with stated exit criteria",
         "A fallback path exists for the uncertain band and for outages",
         "States Jev price as $0.042 per 1M input tokens with a check date",
-        "Has a verification section with pass/fail checks (e.g. outage drill, flag-off behaviour unchanged)"
+        "Has a verification section with pass/fail checks (e.g. outage drill, flag-off behaviour unchanged)",
+        "Specifies alert-action rules for the SMS in code: rate limit per caller, business hours, and suppression when the transfer connected",
+        "Gates out voicemail/spam/wrong-number calls before computing flags",
+        "PRD body is under 250 lines"
       ]
     },
     {
@@ -54,7 +60,23 @@
         "(e) Resume screening: no, high-stakes/regulated with no fairness evidence",
         "(f) RAG grounding: hybrid, fine for textual support but numeric/comparison claims go to code or an LLM",
         "States how strong the evidence is for at least three items (independent vs partner vs none, or sample sizes)",
-        "Cites a measured latency figure for Jev when ruling on (c)"
+        "Cites a measured latency figure for Jev when ruling on (c)",
+        "For (d) and (f), names the lever to use if accuracy is short (rewrite from misses, multi-Jev, or margin-based cascade) and that accuracy must be reported with the share escalated"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "our jev classifier for 'caller wanted to book but no appointment got made' is only ~84% right on our 160 labelled calls (bench/data/voice_missed_booking.jsonl in the jev-skill repo). my boss says gpt-class models get this basically perfect. can we get jev close to that without paying for the big model on every call? show me numbers.",
+      "expected_output": "Uses optimize_questions misses/compare and/or ensemble on the labelled file, reports held-out accuracy before/after with n, and a cascade option with share escalated.",
+      "files": [
+        "bench/data/voice_missed_booking.jsonl"
+      ],
+      "assertions": [
+        "Reads train-only failures via optimize_questions.py misses (does not inspect eval cases)",
+        "Reports held-out accuracy before and after with n, thresholds fitted on train",
+        "Tries a multi-question ensemble or decomposition and reports whether it helped",
+        "Any cascade result states accuracy together with the share of calls escalated",
+        "Says the dataset is synthetic and results are direction only"
       ]
     }
   ]

@@ -16,10 +16,35 @@ what it leaves out:
 | API syntax, pattern catalogue | yes (via live docs) | defers to it |
 | Go / no-go fit check | no | `scripts/fit_check.py` + sourced use-case map (22 placements) |
 | Finding candidates in an existing codebase | no | `scripts/find_decision_calls.py` |
+| Getting accuracy toward a frontier model (question rewriting with a referee, multi-Jev, cascade) | no | `scripts/optimize_questions.py`, `scripts/ensemble.py`, `references/optimization.md` |
 | Calibration method (thresholds, held-out split, three-way bands) | "evaluate on your data" | `scripts/calibrate.py` + `references/calibration.md` |
 | Brownfield / mid-project / greenfield rollout recipes | no | `references/integration.md` |
 | PRD template | no | `assets/prd-template.md` |
 | Dated facts, failure modes, evidence strength | no | `references/facts.md`, `references/fit-map.md` |
+
+## How close can a Jev system get to a frontier model?
+
+Jev cannot be fine-tuned, so the skill moves the intelligence into the question text, the composition
+and a cascade. Same held-out cases for every setup; thresholds, weights and cuts fitted on train only.
+
+![System benchmark](docs/benchmarks/system/system-benchmark.png)
+
+| | Voice: missed booking (synthetic, n=44) | Banking77, 77-way routing (public, n=134) |
+|---|---|---|
+| Jev, first-draft question | 84.1% | 76.1% |
+| Jev, question rewritten with `optimize_questions.py` | **100%** | **83.6%** |
+| Multi-Jev, fitted weights (`ensemble.py`) | 97.7% | 83.6% (no gain: paraphrases err together) |
+| + Fable 5.1 on the least certain share | 100% (18% sent) | 89.6% (13% sent), 91.8% (32% sent) |
+| Fable 5.1 alone | 100% | 91.8% |
+| Jev cost per 1k items | $0.006 to $0.04 | $0.09 |
+
+Goal was "within 3 points of the frontier model while sending it at most 10% of cases":
+- **Voice:** met. Synthetic, n=44.
+- **Banking77:** accuracy met, escalation share missed by 3 points.
+
+Small sets, single run. Full tables, caveats and reproduction steps are in
+[`docs/benchmarks/system/results.md`](docs/benchmarks/system/results.md). The whole benchmark cost
+about $0.12 of Jev calls.
 
 ## Does the skill change what an agent produces?
 
@@ -86,8 +111,10 @@ Jev launched on 2026-09-15, so all of this is early. Measure on your own cases.
 
 - Most public results are small (n=5 to n=2,000) and a week old.
 - Probe cases are synthetic and author-labelled, so they give direction only.
-- Not tested: non-English accuracy, long-context grounding (>6k tokens), a cheap-LLM judge baseline,
-  the community n8n node.
+- Not tested: non-English accuracy, long-context grounding (>6k tokens), a cheap-LLM baseline, the
+  community n8n node.
+- The frontier baseline ran through Claude Code subagents, so it cannot be re-run from an API key;
+  its predictions are committed.
 - Not affiliated with TypeSafe AI.
 
 MIT licensed.

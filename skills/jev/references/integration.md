@@ -8,7 +8,7 @@ the *shape* of the output, never its truth.
 2. Recipe A: existing codebase (brownfield)
 3. Recipe B: mid-project (a decision is about to be built)
 4. Recipe C: from scratch (greenfield)
-5. The patterns (pick per decision)
+5. The patterns (pick per decision), and 5b: rules for outward actions
 6. Production checklist
 7. Workflow platforms (n8n, Zapier, Make)
 
@@ -67,6 +67,17 @@ Goal: replace or pre-screen LLM calls that make *decisions*, without changing be
 9. **Blind fallback for high-stakes paths.** When Jev is unsure, the incumbent prompt runs *unchanged*
    and never sees Jev's answer. A model shown a first opinion tends to agree with it, which would
    corrupt your measurement. On such paths let Jev say only "confident no, skip the expensive call".
+
+**While you are in there** (round-1 lesson: a no-skill agent caught these and the skill run did not):
+- Read how the incumbent call's reply is parsed. Flag exact-match checks (`out === "true"` silently fails
+  on `True.`), defaults that hide failures (garbled reply becomes "no", so nobody is paged), and enum
+  parses that throw on an unexpected label. Moving to typed answers removes these; say so in the plan.
+- Look for time-dependent logic evaluated at processing time instead of event time (a 30-day window
+  measured from "now" flips while a ticket waits in a queue).
+
+**Ramp deterministically.** Cut over 5% -> 25% -> 50% -> 100%, keyed on a hash of a stable id (ticket
+id, call id), so the same item always takes the same path and before/after comparisons are clean. For
+miss-critical gates, run a period where the action fires if *either* Jev or the incumbent says yes.
 
 **Verify (pass/fail):**
 - With the flag off, the test suite and outputs are byte-identical to before.
@@ -129,6 +140,20 @@ Design the product around cheap decisions instead of retrofitting them:
 | **Two-stage Choice** | More than 255 options, or lookalike options | Stage 1 ranks or shortlists; stage 2 reads the top 3 and may reject all. |
 | **Verify-done** | Agents claim completion | Noul: "the update claims X, and the tool-call log contains a matching successful call". |
 | **Async sidecar** | Latency-critical loops (voice) | Decide during TTS playback or after the turn; never block the turn. |
+
+## 5b. When a Jev answer triggers an outward action (SMS, page, email, CRM write)
+
+The decision is only half the design. Specify the action's own rules, in code, not in the question:
+- **Gate first:** skip voicemail, spam, wrong numbers and sub-N-second calls with a call-type Choice or
+  a rule, before any flag is computed.
+- **Suppress when already handled:** no "asked for a human" alert if the transfer actually connected.
+- **Rate-limit per subject** (one alert per caller per 30 minutes) and respect business hours.
+- **Make delivery idempotent:** webhooks retry; key the action on the event id.
+- **Opt-in per client**, and disable a flag for clients whose data cannot support it (no booking signal
+  means no missed-booking flag, not a guess).
+- **Long inputs:** chunk, ask per chunk, and combine in code (max for "did X ever happen").
+- **Stricter bar than dashboards:** an outward action uses the blind-fallback cascade; a dashboard flag
+  can use the plain threshold.
 
 ## 6. Production checklist
 

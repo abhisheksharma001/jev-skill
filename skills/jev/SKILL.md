@@ -5,6 +5,7 @@ license: MIT
 compatibility: Scripts need Python 3.9+ (standard library only). Live calls need TYPESAFE_API_KEY and network access to api.typesafe.ai. Everything except live calls works offline.
 metadata:
   facts_checked: "2026-09-21"
+  benchmark: "docs/benchmarks/system/results.md"
   pinned_model: "jev-1.13.0"
 ---
 
@@ -36,7 +37,8 @@ quoting anyone's numbers, including the ones in this skill.
 | Add a decision to a project in flight | Recipe B: list decisions, questions before code, synthetic cases, fallback in the first PR | `references/integration.md` |
 | Build something new around Jev | Recipe C: pipeline of decisions and generations, judge everything cheap, thresholds as config | `references/integration.md` |
 | Write or fix questions | One judgement per question, literal wording, criteria on both sides | `references/question-design.md` |
-| "What threshold?" / accuracy is poor / false alarms | Calibrate on labelled cases with a held-out split | `references/calibration.md` |
+| "What threshold?" / false alarms | Calibrate on labelled cases with a held-out split | `references/calibration.md` |
+| Accuracy is poor / "make it as good as a frontier model" / "multi-Jev" | Three levers: rewrite the question from its misses, multi-Jev with fitted weights, cascade on the unsure share | `references/optimization.md` |
 | A PRD or spec for a Jev integration | Fill the template from fit verdict and calibration plan | `assets/prd-template.md` |
 | Price, limits, versions, SDKs, gateways, data terms | Snapshot, then re-check if older than ~30 days | `references/facts.md` |
 | Raw API/SDK syntax beyond the examples here | Live docs: `https://docs.typesafe.ai/llms.txt` (any docs page + `.md`) | n/a |
@@ -70,6 +72,28 @@ and tell the user the verdict **and how strong the evidence is**. Many placement
 Where Jev pays off most: an LLM already making a decision, at high volume, with several independent
 questions about the same input, where consistency or a usable probability matters and mistakes are
 reversible. The strongest shape is a **pre-filter or cascade in front of an expensive model**.
+
+## You are the expensive part; spend yourself at design time
+
+The agent running this skill is a frontier model. Jev is not, and cannot be fine-tuned. The way to
+get frontier-level results at Jev prices is to put your own reading and judgement into the *question
+text, the criteria and the composition*, where it is paid for once, and to keep yourself out of the
+per-item loop except for the unsure share.
+
+On this repo's benchmark a first-draft question scored 84.1% (voice calls) and 76.1% (Banking77).
+A rewrite made after reading the train misses scored 100% and 83.6%, at the same run-time cost. A
+cascade on the 13% least certain Banking77 messages reached 89.6% against 91.8% for the frontier
+model alone. These are small held-out sets, a single run, and the voice set is synthetic.
+
+So when accuracy matters:
+1. Get a first result.
+2. Run `optimize_questions.py misses`.
+3. Read the failures like a reviewer.
+4. Rewrite.
+5. Let `compare` referee.
+
+Then try `ensemble.py`, then a cascade. `references/optimization.md` has the method and what did
+not work (paraphrase voting added nothing).
 
 ## Non-negotiables (each one traces to a measured failure)
 
@@ -109,6 +133,8 @@ needed.
 | `scripts/find_decision_calls.py <repo>` | Brownfield scan. Ranks LLM call sites whose output is a label/bool/rating, marks mixed decision+generation sites, and flags nearby numbers/dates. It is a ranking to review, not a verdict. |
 | `scripts/jev_client.py` | Dependency-free client and CLI (`models`, `ask --state f --questions q.json`). Validates questions and reports latency and cost. Use the official SDKs inside real apps. |
 | `scripts/calibrate.py` | Labelled cases in; cost-weighted thresholds, three-way bands, and train/eval TPR/TNR out. Caches answers so re-scoring is free. Warns when n is too small. |
+| `scripts/optimize_questions.py` | `misses` writes a packet of TRAIN-only failures for you to read and rewrite from; `compare` accepts a rewrite only if train loss drops beyond noise, and prints eval for both. It never calls an LLM: you are the rewriter. |
+| `scripts/ensemble.py` | Multi-Jev. Several questions in one call vote on one label; weights are fitted on train (logistic, stdlib). For Choice members it prints accuracy by top-2 margin, which sets the cascade cut. |
 
 The key is read from `TYPESAFE_API_KEY`.
 - Never write it to a file in the repo.
@@ -152,5 +178,12 @@ about one state go in one call, because state is billed once and question count 
   5. Only then "Jev can't do this".
 - **When a result looks perfect, be suspicious.**
   - Easy negatives prove nothing, so add near-misses.
+- **In a brownfield repo, read the incumbent call's output parsing.**
+  - Fragile parsing is often a bigger bug than the model choice.
+  - Examples: exact-match on `"true"`, a default of "no" on a garbled reply, an enum parse that throws.
+  - Report these even though nobody asked.
+- **Keep deliverables short.**
+  - A PRD or plan the reader finishes beats a complete one they skim.
+  - Cut any section that restates another.
 - **Report honestly.** Give eval-split numbers with n, say whether data is synthetic or real, say
   what was not tested, and compare with the incumbent on the same cases.
