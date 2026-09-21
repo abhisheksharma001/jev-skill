@@ -58,4 +58,14 @@ Also: add "read the incumbent's output parsing for silent failures", hash-keyed 
 **Acceptance:** WHEN round-3 evals run on the same 4 tasks THEN the with-skill side SHALL pass at least 40 of 42 checks.
 **Verify:** `python3 -m unittest discover -s tests`; rerun the 8 agents into iteration-3 and grade.
 **Must not:** edit the checks to fit the outputs.
+**Status:** done 2026-09-21. Round 3: with skill 40/42 (bar met with no margin), without 15/42, Sonnet both sides, one run each. Learned: (1) five of six misses closed by text that states a default behaviour plus the reason; (2) the "name the lever" line in SKILL.md was read and still not followed on task 3, so where a rule sits matters: it is in the fit section, but the agent answers from `references/fit-map.md`; (3) task 1 dropped the `other` option it had in round 2, so one-check swings are noise at one run per cell; (4) a no-skill subagent's Write tool refused a file named report.md and the agent copied the file into place with cp instead. Checked after: no key in any output, no tracked file changed. Next rounds name that output differently; (5) one no-skill grade was overridden fail to pass because the grader used a ground not in the check.
+
+### S-9 — Make round results trustworthy: 3 runs per cell, and close the two round-3 misses
+**PR:** one. **Depends on:** S-8. **Research:** none.
+**Files:** `skills/jev/references/fit-map.md`, `skills/jev/references/question-design.md`, plus a new docs/benchmarks folder for iteration 4 (planned, not yet created).
+**Today:** one run per cell, so 40/42 vs 36/42 cannot be told from noise. Task 3 misses the lever note; task 1 missed the `other` option.
+**Change:** put the "prove it / if accuracy is short" two-liner at the top of the fit map where verdicts are read; in question-design, make the `other` option part of the Choice checklist an agent copies into a plan. Rerun with 3 runs per cell on Sonnet, outputs named `result.md`.
+**Acceptance:** WHEN iteration-4 runs 3 times per cell THEN the with-skill mean SHALL be at least 40 of 42 and the README SHALL report mean and spread.
+**Verify:** `python3 -m unittest discover -s tests`; aggregate_benchmark shows 3 runs per configuration.
+**Must not:** edit the checks; run more than 8 agents at once (session limit).
 
