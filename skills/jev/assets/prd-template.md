@@ -2,6 +2,9 @@
 
 > Fill every `<...>`. Delete nothing: write "n/a, because ..." instead, so a reviewer can see the
 > question was considered. Numbers about Jev (price, limits, versions) must carry a check date.
+>
+> **Budget: 250 lines, finished.** This template is about 120. Fill cells, do not add prose around
+> them. Run `wc -l` before handing over; if over, cut restated points and merge table rows.
 
 ## 1. Summary
 - **Decision being made:** <one sentence: "decide whether / which / how much ...">
@@ -52,6 +55,17 @@ Bars are written **before** results are seen.
 
 - Middle band goes to <fallback LLM | human queue>.
 - Blind fallback (fallback never sees Jev's answer) on: <high-stakes paths>.
+
+**Outward-action rules** (SMS, page, email, CRM write; "n/a, dashboard only" if none). These live in
+code, not in the question. Write a default for each; an unknown becomes "default X, confirm with
+<owner>" in section 12, never a blank.
+| Rule | Default |
+|---|---|
+| Gate before flags (voicemail, spam, wrong number, under <n> s) | <rule or call-type Choice> |
+| Suppress when already handled | <e.g. no "asked for a human" alert if the transfer connected> |
+| Rate limit per subject | <e.g. one alert per caller per 30 min> |
+| Business hours | <e.g. send 08:00-18:00 client local time; outside hours queue for next open> |
+| Idempotency | <keyed on event id> |
 
 ## 7. Calibration plan
 - Labelled set: <source>, n=<...>, per-class minimum <...>, hard negatives: <list>.

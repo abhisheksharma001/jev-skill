@@ -57,6 +57,12 @@ Goal: replace or pre-screen LLM calls that make *decisions*, without changing be
 5. **Add the seam** (section 1) behind a flag that defaults to off. No behaviour change yet.
 6. **Offline measure.** Run `scripts/calibrate.py` on the labelled set. Run the incumbent on the same
    cases. Compare on the *eval split* only.
+   - The script splits cases 70/30 by id. Thresholds are fitted on the train part; every number you
+     quote comes from the held-out part, with n.
+   - Never ship 0.5 as a default threshold: answers jitter about ±0.02 and the right cut depends on
+     what a miss costs against a false alarm.
+   - When the deliverable is a plan and not a run, write both rules into the plan in these words, so
+     whoever executes it cannot skip them.
 7. **Shadow mode.** In production, call Jev beside the incumbent, log both answers plus probabilities,
    and act only on the incumbent. Disagreements become new labels. Shadow still sends data to a third
    party, so the egress guard applies.
