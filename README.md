@@ -48,6 +48,51 @@ about $0.12 of Jev calls.
 
 ## Does the skill change what an agent produces?
 
+### Round 4 (three runs per cell, so the score can be told from noise)
+
+Same four tasks and the same 42 checks, run three times on each side (24 runs), both sides on Claude
+Sonnet, graded by a separate agent. Before the run, two skill texts were changed to close the two
+round-3 misses, and the bar was set at a with-skill mean of 40 / 42. **The bar was missed.**
+
+| Task | With skill (3 runs) | Without skill (3 runs) |
+|---|---|---|
+| 1. Plan for an existing support-bot repo (14 checks) | 12, 11, 14 | 6, 8, 5 |
+| 2. PRD for voice-call QA (14) | 13, 13, 13 | 3, 6, 6 |
+| 3. Six proposed uses, which should use Jev (9) | 8, 8, 8 | 3, 4, 3 |
+| 4. Close the accuracy gap, show numbers (5) | 5, 5, 4 | 3, 3, 2 |
+| **Total of 42, per run** | **38, 37, 39** | 15, 21, 16 |
+| **Mean (min to max, sd)** | **38.0 (37 to 39, sd 1.0)** | 17.3 (15 to 21, sd 3.2) |
+| Time per task | 512 s | 349 s |
+| Tokens per task | 112k | 88k |
+
+![Round 4 benchmark tab](docs/benchmarks/iteration-4/benchmark-viewer.png)
+
+What three runs showed that one run could not:
+- The gap is real: the worst with-skill run (37) is 16 checks above the best no-skill run (21).
+- Round 3's 40 was the lucky end. The with-skill score sits at 37 to 39; one check up or down per
+  task is normal.
+- Two misses are stable, 3 of 3 runs, so they are skill problems and not noise. Task 3: after the
+  fit-map edit every run now names a lever for both items, but none says accuracy is reported
+  together with the share escalated for both. Task 2: every PRD gates voicemail before the flags,
+  none gates spam (round 3's single run had named all three).
+- The `other` option fix did not land: 1 of 3 with-skill plans wrote an explicit `other` option.
+  The brownfield recipe does not send the agent to the checklist where the rule now sits.
+- Task 4, all on synthetic data: the three with-skill runs split the data first and reported 97.7%,
+  100% and 100% on 44 held-out calls (first drafts scored 77.3%, 79.5% and 79.5% on the same 44). The three
+  no-skill runs reported 97.5%, 100% and 98.75%, each measured on the same 160 calls used for tuning.
+
+Read this with care:
+- Same author wrote the skill and the checks. No grades were overridden this round. One with-skill
+  fail is disputable (task 1 run 1 names the held-out split but not the 0.5 rule); it was left as graded.
+- The cascade check on task 4 passes when no cascade is shown, so it does not separate the sides.
+- During the run a copy of the skill turned up in the machine's installed skills. Every run's
+  transcript was checked for use of it. One with-skill run (task 1, run 3) had loaded that copy
+  through the Skill tool; it was discarded ungraded and redone. No no-skill run used the skill.
+  No-skill prompts launched after that point carried one extra line telling the agent not to use it.
+- Subagents inherit the author's global instructions, on both sides.
+
+Raw data: [`docs/benchmarks/iteration-4/`](docs/benchmarks/iteration-4/).
+
 ### Round 3 (same tasks and checks, after fixing the round-2 misses)
 
 The skill text was changed in four places to close the six round-2 misses. The 42 checks were not
