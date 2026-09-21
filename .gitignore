@@ -5,3 +5,5 @@ __pycache__/
 *-workspace/
 .DS_Store
 *.cache.jsonl
+bench/work/
+.jev_cache/

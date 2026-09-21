@@ -1,0 +1,12 @@
+{
+ "broad_single": {"type": "noul", "instructions": "This call is a missed booking: the caller wanted an appointment but did not end up with one, and did not give up on it themselves."},
+ "wanted_to_book": {"type": "noul", "instructions": "During this call the caller expressed a wish to schedule, reschedule or get a visit or appointment, even if only implied by describing a problem they need someone to come and fix.",
+   "criteria": {"true": "The caller asks for, or clearly needs and seeks, a visit or appointment for themselves or someone else.", "false": "The caller only asks about prices, hours or a past appointment, wants to cancel, reached the wrong number, is spam, or never speaks."}},
+ "booking_confirmed": {"type": "noul", "instructions": "By the end of the call the agent has confirmed an appointment with a specific date and a specific time, and it was not cancelled later in the call.",
+   "criteria": {"true": "The agent states or reaffirms a specific day and clock time (or time window) as booked, including a moved appointment or a booking for the wrong service.", "false": "No time was confirmed: only pencilled in, a note taken, a waitlist, a callback promised, a date without a time, a transfer, a dropped call, or the booking was cancelled afterwards."}},
+ "caller_withdrew": {"type": "noul", "instructions": "The caller wanted an appointment but then chose on their own to drop it.",
+   "criteria": {"true": "The caller says they will call back later, changed their mind, find it too expensive, will go elsewhere, or cancels the booking they just made.", "false": "The caller never gave up on it: the agent, the system or the call itself failed them, or they got their appointment, or they never wanted one."}},
+ "agent_failed_or_deferred": {"type": "noul", "instructions": "The agent could not complete scheduling during this call and deferred it.",
+   "criteria": {"true": "System error, promised callback, message taken, waitlist, transfer to a person, or the call ended before a time was agreed.", "false": "The agent either completed a booking or the caller did not need one."}},
+ "call_cut_short": {"type": "noul", "instructions": "The call ended abruptly before the conversation reached a natural end (dropped call or hang-up mid-way)."}
+}
