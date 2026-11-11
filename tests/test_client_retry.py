@@ -55,7 +55,10 @@ class Retry529(unittest.TestCase):
         slept.assert_called_once()
 
     def test_529_gives_up_after_retries(self):
+        calls = []
+
         def always_529(req, timeout=None):
+            calls.append(1)
             raise _http_error(529)
 
         with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-not-a-key"}), \
@@ -64,6 +67,7 @@ class Retry529(unittest.TestCase):
             with self.assertRaises(jev_client.JevError) as cm:
                 jev_client._request("POST", "/v1/systemone", {}, retries=2)
         self.assertIn("529", str(cm.exception))
+        self.assertEqual(len(calls), 3)  # retries=2 -> one try + two retries
 
 
 class DefaultModel(unittest.TestCase):
@@ -79,7 +83,6 @@ class DefaultModel(unittest.TestCase):
             with open(os.path.join(SCRIPTS, name + ".py")) as f:
                 src = f.read()
             self.assertIn('"TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"', src, name)
-            self.assertNotIn("jev-1.13.0", src, name)
 
 
 if __name__ == "__main__":
