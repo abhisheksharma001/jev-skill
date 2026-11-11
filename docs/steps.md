@@ -120,6 +120,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN an agent reads facts.md THEN every row SHALL name a source and a read date on or after 2026-09-21, and unverified items SHALL be listed as unverified.
 **Verify:** tests pass; `grep -c 'unverified' skills/jev/references/facts.md` >= 1.
 **Must not:** change pins or guidance (S-13, S-14 do that).
+**Status:** built 2026-11-11 in PR #7 (merge pending). Learned: (1) the draft's Haiku-extracted rows were re-read live before writing and five claims changed (jaggedness has exactly 9 modes; the 320 px image anecdote contradicts the documented 280 px minimum; no governing-law clause was found in the MCA, only arbitration in San Francisco; the "0/40 items" consistency claim was not on the page; the old 1,200 requests figure was per minute while the docs now say per second); (2) the step's `grep -c unverified >= 1` check already passed on main, so it proves nothing: a scripted check that every table row ends in a dated source is the real gate; (3) the docs images header `TypeSafe-Danger-Zone-Images: true` and the docs' own "not ready for production" line are live, so S-14 guidance should not recommend images yet.
 
 ### S-13 — Pin policy: jev-1.14.0 for new work (needs D-3)
 **PR:** one. **Depends on:** D-3, S-12. **Research:** none.
