@@ -31,6 +31,12 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 GRID = [round(x / 100, 2) for x in range(5, 96, 1)]
+DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")
+
+
+def pick_model(arg):
+    """(model, explicit). Explicit = the user named it via --model or TYPESAFE_DEFAULT_MODEL."""
+    return (arg or DEFAULT_MODEL), bool(arg or os.environ.get("TYPESAFE_DEFAULT_MODEL"))
 
 
 def split_of(case_id: str, eval_fraction: float) -> str:
@@ -43,11 +49,19 @@ def load_jsonl(path):
         return [json.loads(l) for l in f if l.strip()]
 
 
-def get_answers(cases, questions, cache_path, offline, model):
+def get_answers(cases, questions, cache_path, offline, model, allow_mix=False, explicit=True):
     cache = {}
     if cache_path and os.path.exists(cache_path):
         for row in load_jsonl(cache_path):
             cache[row["id"]] = row
+    cached_models = sorted({str(cache[c["id"]].get("model")) for c in cases if c["id"] in cache} - {model})
+    if cached_models:
+        msg = (f"cache {cache_path} holds answers from {', '.join(cached_models)} but this run asks for {model}; "
+               "mixing model versions gives thresholds that belong to neither")
+        if not (allow_mix or not explicit):
+            sys.exit(msg + ". Use a fresh --answers file, pass --model " + cached_models[0] + ", or pass --allow-model-mix")
+        # --allow-model-mix, or the model was only the built-in default (nobody asked for it): proceed, loudly
+        print("WARNING: " + msg, file=sys.stderr)
     missing = [c for c in cases if c["id"] not in cache]
     if missing and offline:
         sys.exit(f"--offline but {len(missing)} cases have no cached answers")
@@ -122,14 +136,16 @@ def main(argv=None):
     ap.add_argument("--offline", action="store_true")
     ap.add_argument("--eval-fraction", type=float, default=0.3)
     ap.add_argument("--band", action="store_true")
-    ap.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"))
+    ap.add_argument("--model", help=f"default {DEFAULT_MODEL} (or TYPESAFE_DEFAULT_MODEL)")
+    ap.add_argument("--allow-model-mix", action="store_true", help="proceed when cached answers came from another model")
     ap.add_argument("--out", default="thresholds.json")
     a = ap.parse_args(argv)
+    a.model, explicit = pick_model(a.model)
 
     cases = load_jsonl(a.cases)
     questions = json.load(open(a.questions, encoding="utf-8"))
     costs = json.load(open(a.costs, encoding="utf-8")) if a.costs else {}
-    answers = get_answers(cases, questions, a.answers, a.offline, a.model)
+    answers = get_answers(cases, questions, a.answers, a.offline, a.model, a.allow_model_mix, explicit)
     split = {c["id"]: split_of(c["id"], a.eval_fraction) for c in cases}
 
     n_eval = sum(1 for s in split.values() if s == "eval")
