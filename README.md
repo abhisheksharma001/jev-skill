@@ -83,6 +83,30 @@ about $0.12 of Jev calls.
 
 ## Does the skill change what an agent produces?
 
+### Round 5 (after the S-10 fixes; a different runner, so not comparable with round 4)
+
+Same four tasks and 42 checks, 3 runs per side (24 runs), both sides on Cursor Agent CLI with
+`composer-2.5` (round 4 used Claude Sonnet), graded blind by four Claude Sonnet agents. Each run sat
+in its own temp dir inside a macOS sandbox, and every transcript was audited for reads outside it.
+**The bar of 40 was missed again.**
+
+| Task | With skill (3 runs) | Without skill (3 runs) |
+|---|---|---|
+| 1. Plan for an existing support-bot repo (14 checks) | 14, 12, 12 | 5, 6, 5 |
+| 2. PRD for voice-call QA (14) | 12, 12, 14 | 4, 2, 2 |
+| 3. Six proposed uses, which should use Jev (9) | 9, 9, 8 | 3, 2, 3 |
+| 4. Close the accuracy gap, show numbers (5) | 4, 3, 5 | 1, 1, 1 |
+| **Total of 42, per run** | **39, 36, 39** | 13, 11, 11 |
+| **Mean (sd)** | **38.0 (sd 1.7)** | 11.7 (sd 1.2) |
+
+- The three round-4 misses are fixed: `other`/companion option 3 of 3, spam and wrong-number gate
+  3 of 3, share escalated per item 2 of 3. The remaining misses are spread over other checks.
+- Four no-skill runs read files outside the sandbox before it was tightened. They were discarded
+  and rerun.
+- Single model, synthetic tasks, 3 runs: direction only.
+
+Method, limits and discarded attempts: [`docs/benchmarks/iteration-5/benchmark.md`](docs/benchmarks/iteration-5/benchmark.md).
+
 ### Round 4 (three runs per cell, so the score can be told from noise)
 
 Same four tasks and the same 42 checks, run three times on each side (24 runs), both sides on Claude
