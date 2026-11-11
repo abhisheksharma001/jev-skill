@@ -79,3 +79,126 @@ Also: add "read the incumbent's output parsing for silent failures", hash-keyed 
 **Acceptance:** WHEN round 5 runs 3 times per cell THEN the with-skill mean SHALL be at least 40 of 42 and each of the three named checks SHALL pass in at least 2 of 3 with-skill runs.
 **Verify:** `python3 -m unittest discover -s tests`; aggregate_benchmark shows 3 runs per configuration; transcript audit shows no Skill-tool use.
 **Must not:** edit the checks; run more than 8 agents at once; leave an installed copy of the skill under the home skills folder during the run without saying so in the README.
+
+## 2026-11-11 plan: research refresh, Claude Code router, README (S-11 to S-21)
+
+Source of every change: research run 2026-11-11 (5 agents + main-session spot checks), consolidated in
+`docs/research/2026-11-11/evidence.md` (S-11). Installed copy `~/.claude/skills/jev` was edited first
+on 2026-11-11 and has drifted from `main` both ways, so **no step copies whole files from it**: each
+step ports named hunks onto the repo version.
+
+### Decisions Abhishek makes first (each unblocks steps)
+
+| ID | Question | Recommendation | Unblocks |
+|---|---|---|---|
+| D-3 | Change invariant 6 from "pin jev-1.13.0" to "pin jev-1.14.0 for new work; anything tuned on 1.13.0 stays on it until recalibrated"? | Yes. `jev-latest` moved to 1.14.0 (~2026-10-22); 1.13.0 has 60 days' notice; an independent re-run saw 1.13 -> 1.14 move a phishing task +41.6 pp and RAGTruth -3.9 pp, so the benchmark keeps saying 1.13.0 until re-run (S-21). | S-13 |
+| D-4 | Replace "every Choice has an explicit `other`" with "pair a Choice with a companion Noul (or an explicit `none` when a Noul is not possible)"? | Yes. TypeSafe now advises the companion Noul (docs.typesafe.ai/patterns/companion-noul, read 2026-11-11). Needs the two eval checks reworded (S-14) and S-10 item (a) rewritten. | S-10, S-14, S-15 |
+| D-5 | Ship the Claude Code router in the public repo? It sends the user's own prompts (redacted, first 300 chars) to TypeSafe when the user runs it. | Yes, opt-in, `shadow` by default, with the data-terms warning. Clarify invariant 7 as "no client data or PII goes to any API from the repo's own runs (tests, benchmarks, evals)". | S-18 |
+| D-6 | Add OpenAI's Decisions API as a named alternative (not a second supported backend)? | Yes, as a comparison row only. A head-to-head benchmark is a later research flag (R-7). | S-17 |
+
+### Steps (one PR each, in this order)
+
+### S-11 — Commit the 2026-11-11 evidence register and this plan
+**PR:** one. **Depends on:** nothing. **Blocks:** S-12..S-21 (they cite its IDs).
+**Research:** none · uses the 2026-11-11 run. **Model:** sonnet. **Senior review:** not required — docs only, no verdict changes.
+**Confidence:** 0.9 — content already gathered; only filing.
+**Files:** `docs/research/2026-11-11/evidence.md` (new, from `docs/research/2026-11-11/evidence.md`), `docs/steps.md` (append S-11..S-21, D-3..D-6), `docs/research.md` (append R-4..R-8).
+**Locked tests:** `tests/*`. **Today:** evidence lives in a session scratchpad only.
+**Change:** copy the consolidated register in; append steps and flags verbatim from this plan.
+**Acceptance:** WHEN the PR merges THEN every evidence ID cited by S-12..S-19 SHALL resolve to a row in `docs/research/2026-11-11/evidence.md`.
+**Verify:** `python3 -m unittest discover -s tests -v` passes; `grep -c '^| N-' docs/research/2026-11-11/evidence.md` > 100.
+**Must not:** touch `skills/jev/`.
+
+### S-12 — Refresh facts.md to 2026-11-11
+**PR:** one. **Depends on:** S-11. **Research:** latest · done 2026-11-11 (D-ecosystem, spot-checked).
+**Model:** sonnet. **Senior review:** not required — facts only, each with a source line; tests unaffected.
+**Confidence:** 0.85 — Haiku-gathered rows were spot-checked for packages; legal quotes taken verbatim.
+**Files:** `skills/jev/references/facts.md`.
+**Today:** checked 2026-09-21 (+1.14 rows only in the installed copy). Missing: images row, errors 400/413/415, SDK 0.7.5 / npm 0.7.0 (Node >= 22), `@langchain/typesafe`, official n8n node 0.10.0, Zapier/Make apps, Pydantic AI, LiteLLM 1.14, Cloudflare 1.13 alias, legal: MCA 4.1 consent exception, telemetry in perpetuity, SOC 2 on request; option-order jaggedness mode; OpenAI Decisions API facts.
+**Change:** apply `docs/research/2026-11-11/S5-facts-changes.md` hunk by hunk; port the installed copy's Input/images row; header says what was and was not re-checked.
+**Acceptance:** WHEN an agent reads facts.md THEN every row SHALL name a source and a read date on or after 2026-09-21, and unverified items SHALL be listed as unverified.
+**Verify:** tests pass; `grep -c 'unverified' skills/jev/references/facts.md` >= 1.
+**Must not:** change pins or guidance (S-13, S-14 do that).
+
+### S-13 — Pin policy: jev-1.14.0 for new work (needs D-3)
+**PR:** one. **Depends on:** D-3, S-12. **Research:** none.
+**Model:** sonnet. **Senior review:** required — changes invariant 6, which every tuned threshold depends on.
+**Confidence:** 0.8.
+**Files:** `.claude/CLAUDE.md` (invariant 6), `skills/jev/SKILL.md` (metadata + non-negotiable 5), `skills/jev/references/question-design.md`, `skills/jev/references/integration.md` (checklist), `skills/jev/assets/prd-template.md`, `skills/jev/scripts/{jev_client,calibrate,ensemble,optimize_questions}.py` (default model), `skills/jev/scripts/jev_client.py` (add 529 to retries).
+**Locked tests:** `tests/*` (they use `jev-1.13.0` only as fixture data).
+**Change:** default `jev-1.14.0`; text says tuned-on-1.13.0 paths stay pinned until recalibrated; benchmark docs untouched (still 1.13.0).
+**Acceptance:** WHEN a script runs with no `--model` and no `TYPESAFE_DEFAULT_MODEL` THEN it SHALL send `jev-1.14.0`; WHEN the API returns 529 THEN `jev_client` SHALL retry with backoff.
+**Verify:** tests pass; break test: remove 529 from `RETRY_STATUSES`, the new retry test fails.
+**Must not:** edit `docs/benchmarks/**`; use `jev-latest` anywhere.
+
+### S-14 — Reword the two `other` eval checks (needs D-4)
+**PR:** one. **Depends on:** D-4. **Research:** none. **Model:** sonnet.
+**Senior review:** required — changes a test yardstick (rule 14).
+**Confidence:** 0.8.
+**Files:** `skills/jev/evals/evals.json` (2 checks: ticket-category Choice; email routing to 6 teams).
+**Change:** "includes an explicit other/none option" -> "handles input that fits no option: a companion Noul ('does any option fit?') or an explicit none/other option".
+**Acceptance:** WHEN a plan uses either form THEN the check SHALL pass; WHEN a plan uses neither THEN it SHALL fail.
+**Verify:** grade two saved round-4 outputs by hand against old and new wording; record in PR.
+**Must not:** touch any other check; edit skill text.
+
+### S-15 — Companion-Noul guidance on the agent's path (replaces S-10 item a)
+**PR:** one. **Depends on:** S-14, S-10 items (b)(c) merged or folded in. **Research:** none · vendor doc read 2026-11-11.
+**Model:** sonnet. **Senior review:** not required — S-14 already moved the yardstick; round 5 (S-20) measures it.
+**Confidence:** 0.8.
+**Files:** `skills/jev/references/question-design.md` (primitive table, examples, checklist), `skills/jev/references/integration.md` (Recipe A options line, `PickOne` comment), `skills/jev/SKILL.md` (quick-start example).
+**Change:** port the installed copy's companion-Noul hunks onto the repo text; keep S-9's "plan lists the options" wording, swapping `other` for "a companion Noul, or `none`".
+**Acceptance:** WHEN Recipe A tells an agent to list a Choice's options THEN the same sentence SHALL name the companion Noul.
+**Verify:** tests pass; `grep -n 'companion' skills/jev/references/integration.md` shows the Recipe A line.
+**Must not:** change verdicts (S-16).
+
+### S-16 — Fit-map verdict changes from the 2026-11-11 evidence
+**PR:** one. **Depends on:** S-11. **Research:** deep · done 2026-11-11.
+**Model:** opus — verdict calls under the GOOD rule. **Senior review:** required — verdicts are the skill's main claim; reviewer in a fresh session checks each change against invariant 4.
+**Confidence:** 0.75 — several new sources are single studies or 0-star repos.
+**Files:** `skills/jev/references/fit-map.md`.
+**Change:** apply `docs/research/2026-11-11/S3-fit-map-changes.md` (expected: model routing GOOD -> HYBRID/UNKNOWN for zero-shot per arXiv 2610.02267; skill routing keeps GOOD at small rosters with the 84-skill drop noted; new rows for memory gates, vision box, fraud, agent permission gates, browser element classification). Each change cites evidence IDs.
+**Acceptance:** WHEN a row says GOOD THEN it SHALL cite at least one independent measured record ID.
+**Verify:** tests pass; reviewer table in PR: row, old, new, evidence IDs, independence.
+**Must not:** cite a vendor-only record as the basis for GOOD.
+
+### S-17 — New reference: use-cases.md (where decision models win, lose, and alternatives)
+**PR:** one. **Depends on:** S-11, D-6. **Research:** none · uses evidence register.
+**Model:** sonnet. **Senior review:** required — confidence under 0.85 (new claims surface).
+**Confidence:** 0.75.
+**Files:** `skills/jev/references/use-cases.md` (new, from `docs/research/2026-11-11/S2-use-cases-draft.md`, <= 230 lines), `skills/jev/SKILL.md` (one "Pick the job" row).
+**Acceptance:** WHEN use-cases.md states a number THEN it SHALL carry an evidence ID, n, and independence.
+**Verify:** tests pass; `wc -l` <= 230; every number line greps for `N-`.
+**Must not:** change fit-map verdicts.
+
+### S-18 — Claude Code skill / helper-tier router (needs D-5)
+**PR:** one. **Depends on:** D-5, S-13. **Research:** latest · cookbook read 2026-11-11.
+**Model:** sonnet. **Senior review:** required — secret handling (reads `TYPESAFE_API_KEY`, falls back to an `export` line in `~/.zshrc`/`~/.bashrc`) and data egress (user prompts to a third party).
+**Confidence:** 0.75 — n=8 test only; routing at 84+ skills measured weaker independently.
+**Files:** `skills/jev/scripts/claude_code_router.py`, `skills/jev/references/claude-code-router.md`, `skills/jev/SKILL.md` (job row + scripts row), `tests/test_router.py` (new, offline: redaction, short/slash skip, off mode sends nothing, gate logic and hint thresholds on faked responses, never raises in hook mode).
+**Acceptance:** WHEN mode is `off` THEN no network call SHALL be made; WHEN a prompt holds an email, phone number or key-like string THEN the sent text SHALL hold `<email>`/`<number>`/`<key>` instead; WHEN the API errors THEN the hook SHALL exit 0 with no output.
+**Verify:** `python3 -m unittest tests.test_router -v`; break test: drop the email redaction regex, exactly one test fails.
+**Must not:** add a non-stdlib import; log the key; default to `on`.
+
+### S-19 — README: "Where a decision model is the best tool"
+**PR:** one. **Depends on:** S-16, S-17. **Model:** sonnet. **Senior review:** not required — every line cites the merged fit-map/use-cases.
+**Confidence:** 0.85.
+**Files:** `README.md` (new section after the intro table; table row "sourced use-case map (22 placements)" updated to the new count; "Where the content comes from" adds the 2026-11-11 run; "Honest limits" adds router n=8 and Haiku-gathered vendor rows).
+**Acceptance:** WHEN the README states a number THEN it SHALL name source, n and independence.
+**Must not:** claim a speed-up for the router.
+
+### S-20 — Round-5 evals (absorbs S-10's rerun)
+**PR:** one. **Depends on:** S-10 (b)(c), S-13..S-19. **Model:** sonnet runs, 3 per cell, outputs `result.md`.
+**Senior review:** not required — checks fixed in S-14; transcript audit is the guard.
+**Confidence:** 0.6 — bar of 40/42 missed in round 4; under 0.7 means this PR reports, it does not claim the bar.
+**Change:** as S-10's rerun; before the run, move `~/.claude/skills/jev` aside (or say so in the README), per S-10 Must-not and F-14.
+**Acceptance:** S-10's acceptance line.
+**Must not:** edit checks; more than 8 agents at once.
+
+### S-21 — Re-run the system benchmark on jev-1.14.0
+**PR:** one. **Depends on:** S-13. **Model:** sonnet; spend under $0.50.
+**Senior review:** required — changes published headline numbers.
+**Change:** `bench/score_system.py` with `--model jev-1.14.0`; publish 1.14 next to 1.13, never replacing it.
+
+### Owner step (not a PR) — make the installed skill follow the repo
+After S-18 merges: replace `~/.claude/skills/jev` with the plugin install or a symlink to
+`~/jev-skill/skills/jev`, keeping `~/.claude/hooks/jev-router/` (data dir) as is. Move it aside during S-20.

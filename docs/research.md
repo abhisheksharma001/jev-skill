@@ -26,3 +26,48 @@
 **Review:** higher model — running model (Fable 5.1) is already the strongest available; Abhishek decides.
 **Status:** open.
 **Answer:**
+
+### R-4 — Does the router hold at 94 skills on real prompts?
+
+**Where:** S-18.
+**Find out:** wrong-hint and missed-hint rates on 30-50 labelled shadow-log lines, held-out split.
+**Confidence:** low (n=8; independent 84-skill bench 53.6% top-1).
+**Review:** none.
+**Status:** open (raised 2026-11-11).
+**Answer:**
+
+### R-5 — Does DSPy 3.5.0 ship a TypeSafe adapter?
+
+**Where:** facts.md.
+**Find out:** Does DSPy 3.5.0 ship a TypeSafe adapter?
+**Confidence:** low (version seen, adapter not read).
+**Review:** none.
+**Status:** open (raised 2026-11-11).
+**Answer:**
+
+### R-6 — Are output tokens really free?
+
+**Where:** facts.md price row; typesafe-ai/skills issue #12 open.
+**Find out:** Are output tokens really free?
+**Confidence:** medium.
+**Review:** none.
+**Status:** open (raised 2026-11-11).
+**Answer:**
+
+### R-7 — Jev vs OpenAI Decisions API (gpt-6-luna, $0.10/M) on Banking77 + voice set.
+
+**Where:** S-17 alternatives table, README.
+**Find out:** Jev vs OpenAI Decisions API (gpt-6-luna, $0.10/M) on Banking77 + voice set.
+**Confidence:** none measured.
+**Review:** none.
+**Status:** open (raised 2026-11-11).
+**Answer:**
+
+### R-8 — Does TypeSafe confirm in writing that no MCA 4.1 training consent is given or requested? Owner question to TypeSafe. Confidence: medium (privacy policy and FAQ say no training; contract allows it with consent).
+
+**Where:** 
+**Find out:** Does TypeSafe confirm in writing that no MCA 4.1 training consent is given or requested? Owner question to TypeSafe. Confidence: medium (privacy policy and FAQ say no training; contract allows it with consent).
+**Confidence:** 
+**Review:** none.
+**Status:** open (raised 2026-11-11).
+**Answer:**
