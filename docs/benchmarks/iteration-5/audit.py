@@ -40,8 +40,8 @@ def main(ws):
             for p in re.findall(re.escape(HOME) + r"[^\s\"']*", s):
                 issues.add(f"{tool}: outside work dir {p.replace(HOME, '~')[:80]}")
             if own:  # a temp path that is neither this run's work dir nor its own Cursor home
-                for p in re.findall(r"/(?:private/)?var/folders/[^\s\"']*", s):
-                    q = p.replace("/private/var/", "/var/")
+                for p in re.findall(r"/(?:private/)?(?:var/folders|var/tmp|tmp)/[^\s\"']*", s):
+                    q = p.replace("/private/var/", "/var/").replace("/private/tmp/", "/tmp/")
                     if not q.startswith(own):
                         issues.add(f"{tool}: another run's dir ...{p[-60:]}")
             if cfg == "without_skill" and SKILLISH.search(s):

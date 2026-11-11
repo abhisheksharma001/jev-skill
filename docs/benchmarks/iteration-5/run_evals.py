@@ -21,10 +21,13 @@ TAIL = ("\n\nRepository files mentioned above are under ./repo (paths relative t
         "You have no network access and no TypeSafe API key. Write your complete answer to ./result.md.")
 
 
+BASE = None  # set by --base; a nearly empty parent, so an agent that walks up finds nothing of ours
+
+
 def cursor_env():
     """A fresh HOME per run with only Cursor's auth and CLI config: no ~/.claude/skills, ~/.agents/skills or
     ~/.cursor/skills, and no other run's transcripts."""
-    h = Path(tempfile.mkdtemp(prefix="r5h-"))
+    h = Path(tempfile.mkdtemp(prefix="r5h-", dir=BASE))
     (h / ".cursor").mkdir(parents=True, exist_ok=True)
     (h / "Library").mkdir(exist_ok=True)
     shutil.copy2(Path.home() / ".cursor" / "cli-config.json", h / ".cursor" / "cli-config.json")
@@ -45,7 +48,7 @@ def one(ev, config, n, out, model, runner="cursor"):
     except (OSError, ValueError, KeyError):
         pass
     shutil.rmtree(run / "outputs", ignore_errors=True)
-    work = Path(tempfile.mkdtemp(prefix="r5w-"))
+    work = Path(tempfile.mkdtemp(prefix="r5w-", dir=BASE))
     run.mkdir(parents=True, exist_ok=True)
     for f in ev.get("files", []):
         src, dst = REPO / f, work / "repo" / f
@@ -102,7 +105,11 @@ def main():
     ap.add_argument("--parallel", type=int, default=8)
     ap.add_argument("--runner", choices=("cursor", "codex"), default="cursor")
     ap.add_argument("--model", default="")
+    ap.add_argument("--base", default="/private/var/tmp/jev-r5", help="parent for per-run temp dirs")
     a = ap.parse_args()
+    global BASE
+    BASE = a.base
+    os.makedirs(BASE, exist_ok=True)
     out = Path(a.out)
     evals = json.load(open(REPO / "skills/jev/evals/evals.json"))["evals"]
     for ev in evals:
