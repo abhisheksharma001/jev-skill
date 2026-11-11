@@ -60,7 +60,7 @@ Don't yes/no everything: a Noul at 0.5 means "unsure", not "medium severity". Us
 1. **One judgement per question.** Hiding several judgements in one question is a documented failure
    mode. Ask A and B separately and combine in code (`min(pA, pB)`). You also learn *which* part fired.
 2. **Write the exact condition** you mean, with `criteria` for both yes and no. Adding true/false
-   criteria cut false alarms from 11 to 5 on the Ellavox notification set.
+   criteria cut false alarms from 11 to 5 on a partner's production notification set.
 3. **Options are policies, not labels.** "eat: Drink and eat at the well" made an agent eat at hunger 0.
    Say *when* each option applies; any numeric condition gets computed in code and passed in state.
 4. **No arithmetic, counting, dates or multi-hop inside the question.** Compute `days_overdue`,
