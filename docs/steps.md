@@ -143,6 +143,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN a plan uses either form THEN the check SHALL pass; WHEN a plan uses neither THEN it SHALL fail.
 **Verify:** grade two saved round-4 outputs by hand against old and new wording; record in PR.
 **Must not:** touch any other check; edit skill text.
+**Status:** done 2026-11-11 (combined PR, branch s14-s19-generic). D-4 answered yes (taken from the recommendation on Abhishek's "do the remaining all at once"). Learned: the by-hand regrade of round-4 outputs was not run; S-20 measures it.
 
 ### S-15 — Companion-Noul guidance on the agent's path (replaces S-10 item a)
 **PR:** one. **Depends on:** S-14, S-10 items (b)(c) merged or folded in. **Research:** none · vendor doc read 2026-11-11.
@@ -153,6 +154,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN Recipe A tells an agent to list a Choice's options THEN the same sentence SHALL name the companion Noul.
 **Verify:** tests pass; `grep -n 'companion' skills/jev/references/integration.md` shows the Recipe A line.
 **Must not:** change verdicts (S-16).
+**Status:** done 2026-11-11 (combined PR). Learned: the repo had no Recipe A sentence listing a Choice's options, so one was added in step 2; tone example now uses `mixed` instead of `other`.
 
 ### S-16 — Fit-map verdict changes from the 2026-11-11 evidence
 **PR:** one. **Depends on:** S-11. **Research:** deep · done 2026-11-11.
@@ -163,6 +165,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN a row says GOOD THEN it SHALL cite at least one independent measured record ID.
 **Verify:** tests pass; reviewer table in PR: row, old, new, evidence IDs, independence.
 **Must not:** cite a vendor-only record as the basis for GOOD.
+**Status:** done 2026-11-11 (combined PR, built by an opus helper). Learned: map grew 22 -> 30 placements; feature extraction moved GOOD -> HYBRID because its only independent result has no register ID; post-call QA GOOD -> HYBRID (partner + synthetic only); intent/skill routing GOOD is the closest call (ties small LLMs within ~1.4 pts, N-71/N-3); the maintainers' own run is its own evidence class, not 'partner'.
 
 ### S-17 — New reference: use-cases.md (where decision models win, lose, and alternatives)
 **PR:** one. **Depends on:** S-11, D-6. **Research:** none · uses evidence register.
@@ -172,6 +175,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN use-cases.md states a number THEN it SHALL carry an evidence ID, n, and independence.
 **Verify:** tests pass; `wc -l` <= 230; every number line greps for `N-`.
 **Must not:** change fit-map verdicts.
+**Status:** done 2026-11-11 (combined PR). D-6 yes. Ported from the installed copy (203 lines); first-person wording neutralised.
 
 ### S-18 — Claude Code skill / helper-tier router (needs D-5)
 **PR:** one. **Depends on:** D-5, S-13. **Research:** latest · cookbook read 2026-11-11.
@@ -181,6 +185,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN mode is `off` THEN no network call SHALL be made; WHEN a prompt holds an email, phone number or key-like string THEN the sent text SHALL hold `<email>`/`<number>`/`<key>` instead; WHEN the API errors THEN the hook SHALL exit 0 with no output.
 **Verify:** `python3 -m unittest tests.test_router -v`; break test: drop the email redaction regex, exactly one test fails.
 **Must not:** add a non-stdlib import; log the key; default to `on`.
+**Status:** done 2026-11-11 (combined PR). D-5 yes. Learned: default mode is `shadow` when no env/file (never `on`); new `JEV_ROUTER_MODE` env; `--test` bypasses `off` and sends one request (documented); unsourced "fixed 29, broke 7" line removed; break test: dropping the email regex fails only Redaction.test_email.
 
 ### S-19 — README: "Where a decision model is the best tool"
 **PR:** one. **Depends on:** S-16, S-17. **Model:** sonnet. **Senior review:** not required — every line cites the merged fit-map/use-cases.
@@ -188,6 +193,7 @@ step ports named hunks onto the repo version.
 **Files:** `README.md` (new section after the intro table; table row "sourced use-case map (22 placements)" updated to the new count; "Where the content comes from" adds the 2026-11-11 run; "Honest limits" adds router n=8 and Haiku-gathered vendor rows).
 **Acceptance:** WHEN the README states a number THEN it SHALL name source, n and independence.
 **Must not:** claim a speed-up for the router.
+**Status:** done 2026-11-11 (combined PR). Added a settings table (every env var) so strangers need no maintainer setup.
 
 ### S-20 — Round-5 evals (absorbs S-10's rerun)
 **PR:** one. **Depends on:** S-10 (b)(c), S-13..S-19. **Model:** sonnet runs, 3 per cell, outputs `result.md`.
@@ -212,6 +218,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN the cache holds rows from `jev-1.13.0` and the run asks for `jev-1.14.0` THEN the script SHALL exit non-zero naming both models; WHEN the models match THEN it SHALL behave as before.
 **Verify:** new tests pass; break test: remove the model check, the mismatch test fails.
 **Must not:** edit existing tests; change any threshold or published number.
+**Status:** done 2026-11-11 (combined PR). Learned: the spec's hard stop on a plain default-model rerun conflicts with locked tests that rerun 1.13.0 caches with no --model, so that case warns and proceeds; an explicit --model mismatch exits non-zero; ensemble output now names the model that produced the cached answers, which removes the mislabel either way.
 
 ### Owner step (not a PR) — make the installed skill follow the repo
 After S-18 merges: replace `~/.claude/skills/jev` with the plugin install or a symlink to
