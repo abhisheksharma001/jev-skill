@@ -40,6 +40,8 @@ quoting anyone's numbers, including the ones in this skill.
 | "What threshold?" / false alarms | Calibrate on labelled cases with a held-out split | `references/calibration.md` |
 | Accuracy is poor / "make it as good as a frontier model" / "multi-Jev" | Three levers: rewrite the question from its misses, multi-Jev with fitted weights, cascade on the unsure share | `references/optimization.md` |
 | A PRD or spec for a Jev integration | Fill the template from fit verdict and calibration plan | `assets/prd-template.md` |
+| "What are people using decision models for?" / which shape fits / Jev vs OpenAI Decisions API vs a classifier | Shapes that win, use cases by area, where it lost, choosing an API | `references/use-cases.md` |
+| Route skills / helper-agent models inside Claude Code ("make Claude Code cheaper/faster with Jev") | Two-request hook, shadow first, label the log, then switch on | `references/claude-code-router.md` |
 | Price, limits, versions, SDKs, gateways, data terms | Snapshot, then re-check if older than ~30 days | `references/facts.md` |
 | Raw API/SDK syntax beyond the examples here | Live docs: `https://docs.typesafe.ai/llms.txt` (any docs page + `.md`) | n/a |
 
@@ -144,6 +146,7 @@ needed.
 | `scripts/calibrate.py` | Labelled cases in; cost-weighted thresholds, three-way bands, and train/eval TPR/TNR out. Caches answers so re-scoring is free. Warns when n is too small. |
 | `scripts/optimize_questions.py` | `misses` writes a packet of TRAIN-only failures for you to read and rewrite from; `compare` accepts a rewrite only if train loss drops beyond noise, and prints eval for both. It never calls an LLM: you are the rewriter. |
 | `scripts/ensemble.py` | Multi-Jev. Several questions in one call vote on one label; weights are fitted on train (logistic, stdlib). For Choice members it prints accuracy by top-2 margin, which sets the cascade cut. |
+| `scripts/claude_code_router.py` | Optional Claude Code `UserPromptSubmit` hook: suggests a skill and a helper-model tier per prompt. Opt-in, `shadow` (log only) by default, sends redacted prompt text to TypeSafe. |
 
 The key is read from `TYPESAFE_API_KEY`.
 - Never write it to a file in the repo.
