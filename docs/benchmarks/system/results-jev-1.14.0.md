@@ -48,8 +48,9 @@ One voice case is 2.3 points; one Banking77 case is 0.7 points. "Cases" is the s
 | Banking77: described + Fable, cut for ~30% (share sent) | 91.8% (32%) | 91.8% (35%) | 0.0 | 0 of 134 |
 | Fable alone (same predictions, same cases) | 100.0% / 91.8% | 100.0% / 91.8% | 0.0 | 0 |
 
-No setup moved by more than 2.3 points. Every change is 1 to 3 cases, which is inside the run-to-run jitter of a
-single run on sets this small, so this run shows no measurable regression or gain from 1.13.0 to 1.14.0 on these two
+No setup's accuracy moved by more than 2.3 points (1 to 3 cases); the share sent to Fable moved by up to 4 points
+(13% to 9%, 32% to 35%). Each model was run once, so run-to-run spread was not measured; with changes this small on
+sets this size, this run shows no measurable regression or gain from 1.13.0 to 1.14.0 on these two
 tasks. It does not say the two models are equal: an independent re-run elsewhere saw other tasks move by much more
 (see `docs/research/2026-11-11/evidence.md`).
 
@@ -60,8 +61,8 @@ tasks. It does not say the two models are equal: an independent re-run elsewhere
 | Voice (synthetic) | 100.0% at 0% sent (multi-Jev), 97.7% at 0% (rewritten single) vs Fable 100% | met | met |
 | Banking77 (public) | 88.1% at 9% sent vs Fable 91.8% (3.7 points behind) | share met, accuracy missed by 0.7 points | accuracy met, share missed by 3 points |
 
-On Banking77 the 1.13.0 and 1.14.0 runs each miss the goal in a different way, by about the same size of margin
-(1 to 3 cases of 134). Neither run clears both limits at once.
+On Banking77 the 1.13.0 and 1.14.0 runs each miss the goal in a different way: 1.14.0 misses accuracy by 0.7
+points (about 1 case of 134); 1.13.0 missed the share limit by 3 points (13% sent against 10%, about 4 cases). Neither run clears both limits at once.
 
 ## Read with care
 
