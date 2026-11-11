@@ -24,6 +24,26 @@ TAIL = ("\n\nRepository files mentioned above are under ./repo (paths relative t
 BASE = None  # set by --base; a nearly empty parent, so an agent that walks up finds nothing of ours
 
 
+def sandbox_profile(work, home):
+    """macOS sandbox-exec profile: the agent can read only its own work dir and its own HOME among our files.
+    Blocks the real HOME (the repo, ~/.claude/skills), /private/tmp, the user temp dir and every other run's
+    dirs. ~/Library stays readable (Cursor hangs without it) except app data that holds past chats.
+    Round 5 needed this: an agent grepped the real HOME and read the repo's skill (2026-11-12)."""
+    H, AS = str(Path.home()), str(Path.home() / "Library" / "Application Support")
+    rules = ["(version 1)", "(allow default)",
+             f'(deny file-read* (subpath "{H}"))', f'(allow file-read* (literal "{H}"))',
+             f'(allow file-read* (subpath "{H}/Library"))'] + \
+            [f'(deny file-read* (subpath "{AS}/{a}"))' for a in ("Cursor", "Claude", "Code")] + \
+            [f'(deny file-read* (subpath "{H}/Library/Mobile Documents"))',
+             f'(allow file-read* (subpath "{H}/.local"))', f'(allow file-read* (subpath "{H}/.pyenv"))',
+             '(deny file-read* (subpath "/private/tmp"))', '(deny file-read* (subpath "/private/var/folders"))',
+             f'(deny file-read* (subpath "{BASE}"))', f'(allow file-read* (literal "{BASE}"))',
+             f'(allow file-read* (subpath "{work}"))',
+             f'(allow file-read* (subpath "{home}"))',
+             f'(deny file-write* (subpath "{H}"))', f'(allow file-write* (subpath "{H}/Library"))']
+    return "\n".join(rules) + "\n"
+
+
 def cursor_env():
     """A fresh HOME per run with only Cursor's auth and CLI config: no ~/.claude/skills, ~/.agents/skills or
     ~/.cursor/skills, and no other run's transcripts."""
@@ -60,18 +80,25 @@ def one(ev, config, n, out, model, runner="cursor"):
         prompt = SKILL_LINE + prompt
     env = None
     if runner == "cursor":
-        cmd = ["cursor-agent", "-p", "--trust", "--force", "--sandbox", "enabled", "--output-format", "stream-json",
-               "--workspace", str(work)] + (["--model", model] if model else [])
         env = cursor_env()
+        prof = Path(env["HOME"]).parent / (Path(env["HOME"]).name + ".sb")
+        prof.write_text(sandbox_profile(work, env["HOME"]))
+        env["TMPDIR"] = str(work)
+        # Cursor's own sandbox cannot nest inside sandbox-exec, so it is off; the outer profile does the isolation
+        cmd = ["sandbox-exec", "-f", str(prof), "cursor-agent", "-p", "--trust", "--force", "--sandbox", "disabled",
+               "--output-format", "stream-json", "--workspace", str(work)] + (["--model", model] if model else [])
     else:
         cmd = ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "--sandbox", "workspace-write",
                "-C", str(work), "--json", "-o", str(run / "last_message.txt")] + (["-m", model] if model else [])
     t0 = time.time()
-    with open(run / "events.jsonl", "w") as log:
-        try:
-            p = subprocess.run(cmd + [prompt], stdout=log, stderr=subprocess.STDOUT, timeout=1800, cwd=work, env=env)
-        except subprocess.TimeoutExpired:
-            p = subprocess.CompletedProcess(cmd, 124)
+    # output goes through a pipe, not a file under HOME: the sandbox blocks HOME, and node aborts on a blocked stdio fd
+    try:
+        p = subprocess.run(cmd + [prompt], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           timeout=1800, cwd=work, env=env)
+        out_bytes = p.stdout
+    except subprocess.TimeoutExpired as t:
+        p, out_bytes = subprocess.CompletedProcess(cmd, 124), t.stdout or b""
+    (run / "events.jsonl").write_bytes(out_bytes)
     (run / "outputs").mkdir(exist_ok=True)
     res = work / "result.md"
     if res.exists() and p.returncode == 0:  # a result written before an error is not graded
@@ -92,10 +119,11 @@ def one(ev, config, n, out, model, runner="cursor"):
               open(run / "timing.json", "w"))
     (run / "prompt.txt").write_text(prompt)
     (run / "workdir.txt").write_text(str(work) + ("\n" + env["HOME"] if env else ""))  # audit allows only these temp dirs
+    status = "ok" if res.exists() and p.returncode == 0 else f"failed (exit {p.returncode}, result.md {'written' if res.exists() else 'missing'})"
     shutil.rmtree(work, ignore_errors=True)  # leave no skill copy behind for a later run to find
     if env:
         shutil.rmtree(env["HOME"], ignore_errors=True)
-    return run, "ok" if res.exists() and p.returncode == 0 else f"failed (exit {p.returncode}, result.md {'written' if res.exists() else 'missing'})"
+    return run, status
 
 
 def main():
