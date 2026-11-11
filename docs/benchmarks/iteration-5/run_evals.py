@@ -89,6 +89,9 @@ def one(ev, config, n, out, model, runner="cursor"):
               open(run / "timing.json", "w"))
     (run / "prompt.txt").write_text(prompt)
     (run / "workdir.txt").write_text(str(work) + ("\n" + env["HOME"] if env else ""))  # audit allows only these temp dirs
+    shutil.rmtree(work, ignore_errors=True)  # leave no skill copy behind for a later run to find
+    if env:
+        shutil.rmtree(env["HOME"], ignore_errors=True)
     return run, "ok" if res.exists() and p.returncode == 0 else f"failed (exit {p.returncode}, result.md {'written' if res.exists() else 'missing'})"
 
 
@@ -107,11 +110,13 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
         json.dump({"eval_id": ev["id"], "eval_name": NAMES[ev["id"]], "prompt": ev["prompt"],
                    "assertions": ev["assertions"]}, open(d / "eval_metadata.json", "w"), indent=1)
-    jobs = [(ev, c, n) for n in range(1, a.runs + 1) for ev in evals for c in ("with_skill", "without_skill")]
-    with cf.ThreadPoolExecutor(max_workers=min(a.parallel, 8)) as pool:
-        for fut in cf.as_completed([pool.submit(one, ev, c, n, out, a.model, a.runner) for ev, c, n in jobs]):
-            run, status = fut.result()
-            print(status, run.relative_to(out), flush=True)
+    # without_skill first, while no skill copy exists on disk; a wandering agent then has nothing to find
+    for config in ("without_skill", "with_skill"):
+        jobs = [(ev, n) for n in range(1, a.runs + 1) for ev in evals]
+        with cf.ThreadPoolExecutor(max_workers=min(a.parallel, 8)) as pool:
+            for fut in cf.as_completed([pool.submit(one, ev, config, n, out, a.model, a.runner) for ev, n in jobs]):
+                run, status = fut.result()
+                print(status, run.relative_to(out), flush=True)
 
 
 if __name__ == "__main__":
