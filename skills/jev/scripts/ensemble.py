@@ -180,7 +180,7 @@ def main(argv=None):
     ap.add_argument("--answers", default="jev_ensemble.cache.jsonl")
     ap.add_argument("--offline", action="store_true")
     ap.add_argument("--eval-fraction", type=float, default=0.3)
-    ap.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.13.0"))
+    ap.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"))
     ap.add_argument("--out", default="ensemble.json")
     a = ap.parse_args(argv)
 

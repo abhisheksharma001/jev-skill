@@ -161,7 +161,7 @@ def main(argv=None):
         p.add_argument("--eval-fraction", type=float, default=0.3)
         p.add_argument("--cache-dir", default=".jev_cache")
         p.add_argument("--offline", action="store_true")
-        p.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.13.0"))
+        p.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"))
         p.add_argument("--out", required=True)
         if name == "misses":
             p.add_argument("--questions", required=True)

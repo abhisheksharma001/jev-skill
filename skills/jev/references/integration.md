@@ -34,7 +34,7 @@ empty questions, and returns `model` from the response so drift is visible. Test
 
 Official SDKs:
 - Python: `pip install typesafe-sdk` (0.7.0, Python >= 3.10).
-  `TypeSafeClient().system_one(state, questions, model="jev-1.13.0")`.
+  `TypeSafeClient().system_one(state, questions, model="jev-1.14.0")`.
 - JS: `npm i @typesafe-ai/sdk` (0.6.0, Node >= 20).
   `client.systemOne({ state, questions: { billing: noul("...") } })`.
 - Both read `TYPESAFE_API_KEY` and retry 408/429/5xx.
@@ -163,8 +163,9 @@ The decision is only half the design. Specify the action's own rules, in code, n
 
 ## 6. Production checklist
 
-- [ ] **Pin the model** (`jev-1.13.0`). `jev-latest` and `jev-preview` both resolved to 1.13.0 on
-      2026-09-21, but aliases move. Log `response.model` and alert when it changes. Recalibrate on
+- [ ] **Pin the model** (`jev-1.14.0` for new work; keep `jev-1.13.0` only where thresholds were
+      already tuned on it). `jev-latest` and `jev-preview` resolved to 1.13.0 on 2026-09-21 and to
+      1.14.0 on 2026-11-11, so aliases move. Log `response.model` and alert when it changes. Recalibrate on
       any version change.
 - [ ] **Egress guard:** refuse to send secrets, emails, phone numbers or client identifiers unless
       terms allow it. Applies in shadow mode too.

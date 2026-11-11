@@ -6,7 +6,7 @@ compatibility: Scripts need Python 3.9+ (standard library only). Live calls need
 metadata:
   facts_checked: "2026-09-21"
   benchmark: "docs/benchmarks/system/results.md"
-  pinned_model: "jev-1.13.0"
+  pinned_model: "jev-1.14.0"
 ---
 
 # jev
@@ -116,8 +116,10 @@ not work (paraphrase voting added nothing).
    - Audit a sample of the confident answers.
 4. **Numbers, counting and dates live in code.**
    - Compute them, pass the result into `state`, and ask Jev only the semantic remainder.
-5. **Pin `jev-1.13.0`, log `response.model`, and recalibrate when it changes.**
+5. **Pin `jev-1.14.0`, log `response.model`, and recalibrate when it changes.**
    - The SDK default is `jev-latest`, which moves.
+   - A path already tuned on `jev-1.13.0` stays on `jev-1.13.0` until recalibrated on 1.14.0.
+   - `jev-1.13.0` is still accepted by the API (`references/facts.md`, 2026-11-11).
 6. **Fallback from day one.**
    - Single closed vendor, limits "can change without notice".
    - The seam in `references/integration.md` makes the fallback cheap.

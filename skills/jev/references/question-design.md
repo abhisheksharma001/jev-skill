@@ -19,7 +19,7 @@ in one reviewed file (questions + thresholds together), under version control.
 POST https://api.typesafe.ai/v1/systemone
 Authorization: Bearer $TYPESAFE_API_KEY
 {
-  "model": "jev-1.13.0",
+  "model": "jev-1.14.0",
   "state": "<string>  or  {structured JSON}  or  [array]",
   "questions": {
     "billing":  {"type": "noul",   "instructions": "The message is about a billing problem.",
@@ -101,7 +101,7 @@ then ask the chosen branch's questions).
 
 ```json
 {
-  "model": "jev-1.13.0",
+  "model": "jev-1.14.0",
   "state": {"transcript": [{"speaker": "agent", "text": "..."}, {"speaker": "caller", "text": "..."}],
             "call_meta": {"duration_s": 212, "transferred": false}},
   "questions": {
@@ -130,5 +130,5 @@ code, not from questions.
 - [ ] No arithmetic, dates or counting inside questions; those values are precomputed into state
 - [ ] State is filtered, structured, with untrusted text in a labelled field
 - [ ] All independent questions share one call
-- [ ] Model pinned (`jev-1.13.0`), not `jev-latest`, anywhere thresholds are tuned
+- [ ] Model pinned (`jev-1.14.0` for new work; `jev-1.13.0` only where already tuned on it), not `jev-latest`, anywhere thresholds are tuned
 - [ ] Questions and thresholds live together in one reviewed file
