@@ -43,6 +43,7 @@ INDEX_FILE = DATA / "skill_index.json"
 LOG_FILE = DATA / "log.jsonl"
 MODE_FILE = DATA / "mode"
 VERSION = "v2"
+INDEX_FORMAT = 2  # bump when the cached index content changes (2 = redacted skill text)
 
 MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")  # pinned dated id, never jev-latest; recalibrate when it changes
 URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai") + "/v1/systemone"
@@ -140,9 +141,10 @@ def skill_index() -> dict:
     newest = max((f.stat().st_mtime for f in files), default=0)
     if INDEX_FILE.exists() and INDEX_FILE.stat().st_mtime >= newest:
         try:
-            idx = json.loads(INDEX_FILE.read_text())
-            if idx and isinstance(next(iter(idx.values())), dict):
-                return idx
+            cached = json.loads(INDEX_FILE.read_text())
+            # Only trust a cache written by this format: older ones held unredacted skill text.
+            if isinstance(cached, dict) and cached.get("format") == INDEX_FORMAT and cached.get("skills"):
+                return cached["skills"]
         except ValueError:
             pass
     idx = {}
@@ -158,7 +160,7 @@ def skill_index() -> dict:
         body = redact_all(re.sub(r"\s+", " ", body).strip()[: BODY_CHARS * 4])[:BODY_CHARS]
         idx[f.parent.name] = {"short": desc[:SHORT_DESC], "full": desc[:FULL_DESC], "body": body}
     DATA.mkdir(parents=True, exist_ok=True)
-    INDEX_FILE.write_text(json.dumps(idx, indent=1, sort_keys=True))
+    INDEX_FILE.write_text(json.dumps({"format": INDEX_FORMAT, "skills": idx}, indent=1, sort_keys=True))
     return idx
 
 

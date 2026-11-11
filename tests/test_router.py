@@ -276,6 +276,20 @@ class SkillTextRedacted(RouterCase):
             self.assertNotIn(leaked, blob)
         self.assertIn("<email>", idx["client-x"]["short"])
 
+    def test_old_unredacted_index_cache_is_rebuilt(self):
+        mock.patch.stopall()
+        for name, value in (("DATA", self.data), ("INDEX_FILE", self.data / "skill_index.json"),
+                            ("SKILLS_DIR", self.data / "skills")):
+            p = mock.patch.object(router, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        sk = self.data / "skills" / "client-x"
+        sk.mkdir(parents=True)
+        (sk / "SKILL.md").write_text("---\nname: client-x\ndescription: Mail ops@client.example\n---\nbody\n")
+        old = {"client-x": {"short": "Mail ops@client.example", "full": "Mail ops@client.example", "body": "body"}}
+        router.INDEX_FILE.write_text(json.dumps(old))  # pre-fix flat cache, newer than SKILL.md
+        self.assertNotIn("ops@client.example", json.dumps(router.skill_index()))
+
 
 class RouteAndHook(RouterCase):
     def two_replies(self):
