@@ -108,6 +108,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN the PR merges THEN every evidence ID cited by S-12..S-19 SHALL resolve to a row in `docs/research/2026-11-11/evidence.md`.
 **Verify:** `python3 -m unittest discover -s tests -v` passes; `grep -c '^| N-' docs/research/2026-11-11/evidence.md` > 100.
 **Must not:** touch `skills/jev/`.
+**Status:** done 2026-11-11 (PR #5, 8ecbc38; CI fix PR #6, 081a2d9). 186 `N-` rows, 23 tests pass, `tests/` and `skills/jev/` untouched. Learned: (1) PR #5 was red although it only added docs, because `ubuntu-latest` had moved to Ubuntu 26.04, where `actions/setup-python` finds no Python 3.9 (the 3.12 job was only cancelled); fixed as its own step by pinning `runs-on: ubuntu-24.04`, then S-11 was rebased and merged on green; the pin needs a bump when GitHub retires that image; (2) the workflow runs on both `push` and `pull_request`, so every job shows twice and the pass count from `gh pr checks` is inflated: read the job names; (3) the installed copy at `~/.claude/skills/jev` had drifted from main in both directions, so later steps port changes hunk by hunk, never whole files.
 
 ### S-12 — Refresh facts.md to 2026-11-11
 **PR:** one. **Depends on:** S-11. **Research:** latest · done 2026-11-11 (D-ecosystem, spot-checked).
