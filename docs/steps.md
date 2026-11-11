@@ -202,6 +202,7 @@ step ports named hunks onto the repo version.
 **Change:** as S-10's rerun; before the run, move `~/.claude/skills/jev` aside (or say so in the README), per S-10 Must-not and F-14.
 **Acceptance:** S-10's acceptance line.
 **Must not:** edit checks; more than 8 agents at once.
+**Progress 2026-11-11:** owner switched the runner to ChatGPT (Codex CLI 0.167.0, gpt-6.1-sol, high effort, `docs/benchmarks/iteration-5/run_codex.py`, sandbox workspace-write, no network, no key). 24 runs started; 14 finished cleanly, 10 stopped on "Your workspace is out of credits". Audit: one clean without-skill run (mixed-fit-triage run-1) walked up from its work dir, which sat inside the repo, and read README.md and docs/research evidence; discarded ungraded (`skills/jev-workspace/iteration-5-discarded/`). No run read evals.json. Runner fixed: work dirs now outside the repo; only exit-0 runs count or are skipped. 11 runs to redo once credits are refilled; then blind grading (letters, shuffled) and aggregate. Runner change from Sonnet means round 5 is not directly comparable with round 4.
 
 ### S-21 — Re-run the system benchmark on jev-1.14.0
 **PR:** one. **Depends on:** S-13. **Model:** sonnet; spend under $0.50.
