@@ -159,7 +159,7 @@ cat > q.json <<'JSON'
 {"billing": {"type": "noul", "instructions": "The message is about a billing problem.",
              "criteria": {"true": "Charges, refunds, invoices, failed payments.", "false": "Anything else."}},
  "tone":    {"type": "choice", "instructions": "Tone of the customer's message.",
-             "criteria": {"angry": "hostile", "calm": "neutral or polite", "other": "none of these"}},
+             "criteria": {"angry": "hostile", "calm": "neutral or polite", "mixed": "both hostile and polite parts"}},
  "urgency": {"type": "score", "instructions": "How soon does this need a human?",
              "criteria": ["can wait", "needs attention this week", "needs attention today"]}}
 JSON

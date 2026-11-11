@@ -20,7 +20,7 @@ dependency scattered through the code:
 ```ts
 // decision-model.ts: the only file that knows a provider exists
 export type YesNo   = { kind: "yesno";  id: string; instructions: string; yesMeans?: string; noMeans?: string };
-export type PickOne = { kind: "pick";   id: string; instructions: string; options: Record<string, string> }; // include "other"
+export type PickOne = { kind: "pick";   id: string; instructions: string; options: Record<string, string> }; // pair with a companion YesNo "does any option fit?"
 export type Rate    = { kind: "rate";   id: string; instructions: string; levels: string[] };               // 2-10, fully described
 export type Answer  = { id: string; p?: number; choice?: string; score?: number; confidence?: number;
                         probabilities?: Record<string, number> };
@@ -48,7 +48,8 @@ Goal: replace or pre-screen LLM calls that make *decisions*, without changing be
    is a label, bool or rating. It marks mixed sites ("split decision from generation") and flags nearby
    numbers and dates. Review by hand: it is a ranking, not a verdict.
 2. **Fit-check each candidate.** `python3 scripts/fit_check.py --answers -`. Drop NO-GOs; note the
-   guards for the rest.
+   guards for the rest. For a pick-one decision, the plan lists the Choice's options and, with them,
+   the companion Noul ("does any option fit?") that catches input fitting none of them.
 3. **Rank by payoff** = calls/day x tokens x incumbent price. Start with the highest-volume, most
    reversible decision.
 4. **Build a labelled set from history.** Export past inputs plus the outcome you now know was right.
@@ -173,7 +174,7 @@ The decision is only half the design. Specify the action's own rules, in code, n
       privacy@typesafe.ai); US hosting; no SOC 2 evidence found. A named person re-reads the *current*
       terms before production PII. Through Vercel AI Gateway, ZDR and no-training are per-request options.
 - [ ] **Timeouts and retries:** set a client timeout (a near-64k request once stalled silently); retry
-      408/429/5xx with backoff; treat 529 as overload.
+      408/429/5xx and 529 ("Overloaded") with backoff.
 - [ ] **Rate limits:** 250k tokens/s and 1,200 req/min at time of writing, "adjusting dynamically".
       Build backpressure.
 - [ ] **Fallback stays warm:** periodic cheap health call so an outage isn't discovered mid-escalation.

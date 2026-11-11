@@ -27,7 +27,7 @@ Authorization: Bearer $TYPESAFE_API_KEY
                               "false": "Anything else, including general account questions."}},
     "tone":     {"type": "choice", "instructions": "Tone of the customer's message.",
                  "criteria": {"angry": "hostile or threatening", "calm": "neutral or polite",
-                              "other": "none of these"}},
+                              "mixed": "both hostile and polite parts"}},
     "urgency":  {"type": "score",  "instructions": "How soon does this need a human?",
                  "criteria": ["can wait", "needs attention this week", "needs attention today"]}
   }
@@ -50,7 +50,7 @@ structured JSON.
 | You need | Use | Watch out |
 |---|---|---|
 | Is X true? (gate, flag, pass/fail) | **Noul**: P(true), 0-1 | No `confidence` field. P(X) + P(not X) need not sum to 1 (0.8 seen on ambiguous items), so don't carry thresholds across phrasings. |
-| Which one of these? (route, category, outcome) | **Choice**: up to 255 options | Always add `other`/`none`. Near-synonym options split the vote. Reordering options changed 7/120 answers in one test. When top-2 are within ~0.1, treat as uncertain. |
+| Which one of these? (route, category, outcome) | **Choice**: up to 255 options | A Choice always picks something, even when nothing fits. Pair it with a **companion Noul** ("does any option fit?") and read the Choice only when that Noul is a clear yes; TypeSafe now advises this over an `other`/`none` option, which competes with real options for probability (docs.typesafe.ai/patterns/companion-noul, read 2026-11-11). Use an explicit `none` only where a Noul is not possible. Near-synonym options split the vote: add one Noul per close candidate. Reordering options changed 7/120 answers in one test. When top-2 are within ~0.1, treat as uncertain. |
 | How much / how severe? (quality, urgency, relevance) | **Score**: 2-10 ordered levels | Each level is judged on its own; the model never sees level numbers or neighbours, so "worse than the previous level" means nothing. Describe each level fully. |
 
 Don't yes/no everything: a Noul at 0.5 means "unsure", not "medium severity". Use Score for severity.
@@ -112,7 +112,9 @@ then ask the chosen branch's questions).
     "outcome": {"type": "choice", "instructions": "Final outcome of the call.",
                 "criteria": {"booked": "appointment confirmed", "callback": "caller will be called back",
                              "info_only": "caller only got information", "transferred": "handed to a human",
-                             "abandoned": "caller hung up or call dropped before resolution", "other": "none of these"}},
+                             "abandoned": "caller hung up or call dropped before resolution"}},
+    "outcome_listed": {"type": "noul", "instructions": "The call ended in one of these outcomes: booked, callback, information only, transferred to a human, or abandoned.",
+                       "criteria": {"true": "One of those five clearly happened.", "false": "The call ended some other way, or the transcript does not show how it ended."}},
     "agent_quality": {"type": "score", "instructions": "How well did the voice agent handle the caller's request?",
                       "criteria": ["failed the caller", "partially helped", "fully resolved the request"]}
   }
@@ -124,8 +126,9 @@ code, not from questions.
 ## 7. Checklist before the first real call
 - [ ] Every question is one judgement, and its name is not needed to understand it
 - [ ] Every Noul has `criteria.true`/`criteria.false`
-- [ ] Every Choice has an explicit `other` option, and any plan or PRD that lists the options lists
-      `other` with them (without it, input that fits no option is forced into a wrong one at high confidence)
+- [ ] Every Choice whose input can fit no option has a companion Noul ("does any option fit?"), or an
+      explicit `none` where a Noul is not possible, and any plan or PRD that lists the options names the
+      companion Noul with them (without it, input that fits no option is forced into a wrong one at high confidence)
 - [ ] Every Score level is described fully, without relying on its neighbours
 - [ ] No arithmetic, dates or counting inside questions; those values are precomputed into state
 - [ ] State is filtered, structured, with untrusted text in a labelled field
