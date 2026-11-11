@@ -146,7 +146,7 @@ needed.
 | `scripts/calibrate.py` | Labelled cases in; cost-weighted thresholds, three-way bands, and train/eval TPR/TNR out. Caches answers so re-scoring is free. Warns when n is too small. |
 | `scripts/optimize_questions.py` | `misses` writes a packet of TRAIN-only failures for you to read and rewrite from; `compare` accepts a rewrite only if train loss drops beyond noise, and prints eval for both. It never calls an LLM: you are the rewriter. |
 | `scripts/ensemble.py` | Multi-Jev. Several questions in one call vote on one label; weights are fitted on train (logistic, stdlib). For Choice members it prints accuracy by top-2 margin, which sets the cascade cut. |
-| `scripts/claude_code_router.py` | Optional Claude Code `UserPromptSubmit` hook: suggests a skill and a helper-model tier per prompt. Opt-in, `shadow` (log only) by default, sends redacted prompt text and installed skills' descriptions and SKILL.md excerpts to TypeSafe. |
+| `scripts/claude_code_router.py` | Optional Claude Code `UserPromptSubmit` hook: suggests a skill per prompt (helper-model tier hint only with `JEV_ROUTER_TIER=on`). Opt-in, `shadow` (log only) by default, sends redacted prompt text and installed skills' descriptions and SKILL.md excerpts to TypeSafe. |
 
 The key is read from `TYPESAFE_API_KEY`.
 - Never write it to a file in the repo.

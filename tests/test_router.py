@@ -253,6 +253,17 @@ class RedactionOrder(unittest.TestCase):
         prompt = ("x" * 40 + " ") * 14 + "secretAPIkey_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"
         self.assertNotIn("secretAPIkey", router.redact(prompt))
 
+    def test_long_input_redacts_fast(self):
+        """The hook has a 5 s budget; redaction runs on the whole prompt, so it must stay linear."""
+        import time
+        for blob in ("ab.c" * 12500, "a1b2" * 12500, " 1" * 25000):
+            t0 = time.perf_counter()
+            router.redact(blob)
+            self.assertLess(time.perf_counter() - t0, 0.5)
+
+    def test_ordinary_skill_words_kept(self):
+        self.assertEqual(router.redact("use skill-creator and skill_index"), "use skill-creator and skill_index")
+
     def test_jwt(self):
         out = router.redact("auth eyJhbGciOiJI.eyJzdWIiOiIx.abc123 please")
         self.assertNotIn("eyJ", out)

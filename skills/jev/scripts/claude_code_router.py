@@ -19,8 +19,10 @@ only, default) | on (log + one-line hint into Claude's context). A missing file,
 anything unrecognised means shadow, never on. The hook never blocks a prompt: any error exits 0
 silently.
 
-Privacy: only the first MAX_CHARS characters are sent, after emails, phone numbers, long digit
-runs and key-like strings are replaced. Slash commands and very short replies are not sent.
+Privacy: each routed prompt sends the first MAX_CHARS characters of the prompt, every installed
+skill's name and description, and SKILL.md excerpts for the top 3, all after emails, phone numbers,
+long digit runs, key-like strings and long tokens are replaced. Slash commands and very short replies
+are not sent. The tier hint is added only with JEV_ROUTER_TIER=on.
 
 Install: see references/claude-code-router.md. Data dir: $JEV_ROUTER_HOME or ~/.claude/hooks/jev-router.
 Skills:  $JEV_ROUTER_SKILLS or ~/.claude/skills.  Key: $TYPESAFE_API_KEY (never logged or printed).
@@ -92,9 +94,9 @@ def _key() -> str:
 
 # ---------- redaction ----------
 _REDACTIONS = [
-    (re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"), "<email>"),
+    (re.compile(r"(?<![\w.+-])[\w.+-]+@[\w-]+\.[\w.-]+"), "<email>"),  # anchored: linear time
     (re.compile(r"\beyJ[\w-]+\.[\w-]+\.[\w-]*"), "<token>"),  # JWT
-    (re.compile(r"\b(sk|pk|ghp|gho|xox[bp]|AKIA)[-_A-Za-z0-9]{8,}\b"), "<key>"),
+    (re.compile(r"\b(?:(?:sk|pk)[-_](?=[\w-]*\d)[\w-]{16,}|(?:ghp|gho|xox[bp])[-_][A-Za-z0-9_-]{8,}|AKIA[A-Z0-9]{12,})\b"), "<key>"),
     (re.compile(r"\b[A-Za-z0-9_-]{32,}\b"), "<token>"),
     (re.compile(r"\+?\d[\d\s().-]{7,}\d"), "<number>"),
     (re.compile(r"\b\d{5,}\b"), "<number>"),
@@ -157,7 +159,7 @@ def skill_index() -> dict:
         if not desc:
             continue
         desc = redact_all(desc)
-        body = redact_all(re.sub(r"\s+", " ", body).strip()[: BODY_CHARS * 4])[:BODY_CHARS]
+        body = redact_all(re.sub(r"\s+", " ", body).strip())[:BODY_CHARS]
         idx[f.parent.name] = {"short": desc[:SHORT_DESC], "full": desc[:FULL_DESC], "body": body}
     DATA.mkdir(parents=True, exist_ok=True)
     INDEX_FILE.write_text(json.dumps({"format": INDEX_FORMAT, "skills": idx}, indent=1, sort_keys=True))

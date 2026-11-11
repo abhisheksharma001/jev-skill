@@ -7,7 +7,8 @@ Built and first tested 2026-11-11. **Opt-in, and `shadow` (log only) until you s
 ## What it can and cannot do
 
 - **Can:** on every prompt, suggest which installed skill fits, and whether helper agents should be
-  `haiku`, `sonnet` or `opus`. The hint is one line of added context; Claude still decides.
+  `haiku`, `sonnet` or `opus` (the tier part only with `JEV_ROUTER_TIER=on`). The hint is one line of
+  added context; Claude still decides.
 - **Cannot:** switch the main session's model mid-conversation. A hook can only add context. Jev is
   not a coding model (docs.typesafe.ai/introduction/coding-agents, read 2026-11-11).
 - **Realistic gain:** fewer wrong or needless skill loads, and cheaper helper agents. Claude already
@@ -85,7 +86,9 @@ What leaves the machine on each routed prompt: the first 300 characters of the p
 skill's name and description (up to 220 characters each), and for the top 3 skills up to 600 characters
 of description plus 600 characters of SKILL.md body. All of it is redacted first, by replacing emails (`<email>`), phone numbers and
 runs of 5+ digits (`<number>`), key-like strings (`<key>`) and long opaque tokens (`<token>`). That is a
-filter, not a guarantee: client names, addresses and free-text secrets still pass. If you work with
+filter, not a guarantee: client names, addresses and free-text secrets still pass. It also over-redacts
+some ordinary text (package pins like `react@18.3.1`, dates, IP addresses, 32+ character tool names),
+which can cost the router a little accuracy. If you work with
 client or regulated data, use `off` until someone has read TypeSafe's current terms, or enable it only
 for non-client work. Local copy: `log.jsonl` holds the redacted text it sent; delete it when done.
 
