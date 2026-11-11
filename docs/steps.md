@@ -207,6 +207,7 @@ step ports named hunks onto the repo version.
 **PR:** one. **Depends on:** S-13. **Model:** sonnet; spend under $0.50.
 **Senior review:** required — changes published headline numbers.
 **Change:** `bench/score_system.py` with `--model jev-1.14.0`; publish 1.14 next to 1.13, never replacing it.
+**Status:** done 2026-11-11. Published `docs/benchmarks/system/results-jev-1.14.0.md` next to `results.md` (1.13.0 numbers unchanged). Spend about $0.118 (880 battery calls). Learned: (1) no setup moved more than 2.3 points (1 to 3 cases of n=44/134), inside single-run jitter, so no measurable change on these two tasks; it does not prove the models equal (evidence.md has an independent run where other tasks moved a lot); (2) Banking77 still misses the frozen goal, now on accuracy (88.1% at 9% sent, 3.7 points behind Fable) instead of on share; (3) question wording was reused from 1.13.0, so this measures a moved system, not one retuned for 1.14.0; (4) `score_system.py` gained `--work` and now prints the model found in the caches, so a results header cannot name the wrong model.
 
 ### S-22 — Calibration cache must not mix model versions; untrack stale ensemble.json
 **PR:** one. **Depends on:** S-13. **Research:** none. **Model:** sonnet. **Confidence:** 0.8.
