@@ -40,7 +40,7 @@ Bars are written **before** results are seen.
 ```json
 <state schema>
 ```
-**Questions** (one judgement each; every Noul has true/false criteria; every Choice has `other`):
+**Questions** (one judgement each; every Noul has true/false criteria; every Choice has a companion Noul "does any option fit?" or an explicit `none`):
 | id | type | instructions (exact wording) | criteria / options / levels | action it drives |
 |---|---|---|---|---|
 | <...> | noul | <...> | true: <...> / false: <...> | <...> |
@@ -101,7 +101,7 @@ Rollback: flip <flag>. Expected effect within <time>.
 | Vendor: single closed provider, limits "can change without notice", no SLA history | Seam + warm fallback adapter; backpressure; outage drill |
 | Data terms / PII | Named owner re-reads current terms; ZDR or redaction; egress guard |
 | Non-English inputs | Per-language calibration |
-| Option-order / lookalike-option sensitivity | `other` option; merged lookalikes; order-shuffle test |
+| Option-order / lookalike-option sensitivity | companion Noul (or `none`); merged lookalikes; order-shuffle test |
 | Silent stall near context limit | Size cap + client timeout |
 | Low cost amplifies a wrong judge at scale | Human-labelled audit sample each <period> |
 

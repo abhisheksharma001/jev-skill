@@ -36,7 +36,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from calibrate import get_answers, load_jsonl, split_of  # noqa: E402
+from calibrate import get_answers, load_jsonl, pick_model, split_of  # noqa: E402
+
+DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")  # same as calibrate.DEFAULT_MODEL
 
 
 def feature(ans: dict) -> float:
@@ -180,9 +182,11 @@ def main(argv=None):
     ap.add_argument("--answers", default="jev_ensemble.cache.jsonl")
     ap.add_argument("--offline", action="store_true")
     ap.add_argument("--eval-fraction", type=float, default=0.3)
-    ap.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"))
+    ap.add_argument("--model", help=f"default {DEFAULT_MODEL}")
+    ap.add_argument("--allow-model-mix", action="store_true", help="proceed when cached answers came from another model")
     ap.add_argument("--out", default="ensemble.json")
     a = ap.parse_args(argv)
+    a.model, explicit = pick_model(a.model)
 
     questions = json.load(open(a.questions, encoding="utf-8"))
     members = a.members.split(",") if a.members else list(questions)
@@ -192,7 +196,7 @@ def main(argv=None):
     cases = [c for c in load_jsonl(a.cases) if a.target in c.get("labels", {})]
     if len(cases) < 20:
         sys.exit(f"only {len(cases)} cases carry the label '{a.target}'; an ensemble needs at least 20, ideally 100+")
-    answers = get_answers(cases, questions, a.answers, a.offline, a.model)
+    answers = get_answers(cases, questions, a.answers, a.offline, a.model, a.allow_model_mix, explicit)
     rows = [{"id": c["id"], "label": c["labels"][a.target], "answers": answers[c["id"]]["answers"],
              "split": split_of(c["id"], a.eval_fraction)} for c in cases]
     n_eval = sum(1 for r in rows if r["split"] == "eval")
@@ -202,7 +206,8 @@ def main(argv=None):
     if n_eval < 30:
         print(f"> WARNING: {n_eval} eval cases. Direction only.\n")
     types = {questions[m]["type"] for m in members}
-    out = {"target": a.target, "model": a.model}
+    seen = sorted({answers[c["id"]].get("model") or a.model for c in cases})
+    out = {"target": a.target, "model": seen[0] if len(seen) == 1 else seen}  # what answered, not what was asked
     if types <= {"noul", "score"}:
         run_binary(rows, members, out)
     elif types == {"choice"}:

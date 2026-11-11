@@ -37,8 +37,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from calibrate import confusion, fit_noul, get_answers, load_jsonl, split_of  # noqa: E402
+from calibrate import confusion, fit_noul, get_answers, load_jsonl, pick_model, split_of  # noqa: E402
 
+DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")  # same as calibrate.DEFAULT_MODEL
 NOISE = 0.02  # observed run-to-run jitter of a Jev probability; a win smaller than this is not a win
 
 
@@ -49,7 +50,7 @@ def qhash(questions: dict) -> str:
 def answers_for(cases, questions, a):
     os.makedirs(a.cache_dir, exist_ok=True)
     cache = os.path.join(a.cache_dir, f"{qhash(questions)}.cache.jsonl")  # new wording -> new cache
-    return get_answers(cases, questions, cache, a.offline, a.model)
+    return get_answers(cases, questions, cache, a.offline, a.model, a.allow_model_mix, a.model_explicit)
 
 
 def logloss(pairs) -> float:
@@ -161,7 +162,8 @@ def main(argv=None):
         p.add_argument("--eval-fraction", type=float, default=0.3)
         p.add_argument("--cache-dir", default=".jev_cache")
         p.add_argument("--offline", action="store_true")
-        p.add_argument("--model", default=os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0"))
+        p.add_argument("--model", help=f"default {DEFAULT_MODEL}")
+        p.add_argument("--allow-model-mix", action="store_true", help="proceed when cached answers came from another model")
         p.add_argument("--out", required=True)
         if name == "misses":
             p.add_argument("--questions", required=True)
@@ -170,6 +172,7 @@ def main(argv=None):
             p.add_argument("--baseline", required=True)
             p.add_argument("--candidate", required=True)
     a = ap.parse_args(argv)
+    a.model, a.model_explicit = pick_model(a.model)
     (cmd_misses if a.cmd == "misses" else cmd_compare)(a)
 
 

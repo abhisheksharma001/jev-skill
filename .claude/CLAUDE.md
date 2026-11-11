@@ -1,6 +1,6 @@
 # jev-skill — project rules
 
-Open-source agent skill for TypeSafe AI's Jev decision model. Standard: `~/.claude/skills/mystandard/SKILL.md`.
+Open-source agent skill for TypeSafe AI's Jev decision model. Work in steps from `docs/steps.md`: one step per PR, tests locked while code is built.
 
 ## Invariants
 1. No secret in the repo, ever. Keys come from `TYPESAFE_API_KEY` in the environment only.
@@ -9,7 +9,7 @@ Open-source agent skill for TypeSafe AI's Jev decision model. Standard: `~/.clau
 4. A verdict of GOOD needs independent measured evidence. Vendor or partner-only evidence is never GOOD.
 5. Benchmarks publish held-out numbers only, with n, and say synthetic vs public data.
 6. Pin a dated Jev model id in anything with tuned thresholds; new work pins `jev-1.14.0`. A path tuned on `jev-1.13.0` stays on `jev-1.13.0` until it is recalibrated. Never `jev-latest`.
-7. No client data or PII goes to any API from this repo. Synthetic or public datasets only.
+7. No client data or PII goes to any API from this repo's own runs (tests, benchmarks, evals). Synthetic or public datasets only. A user running the shipped scripts on their own data is covered by SKILL.md non-negotiable 8.
 
 ## Verify
 ```bash

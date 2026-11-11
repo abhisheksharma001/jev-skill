@@ -50,11 +50,11 @@ Cost rule of thumb: a 600-token battery call is about $0.000025; 1M such calls i
 Rows without a source date were measured on or before 2026-09-21 and not repeated.
 | Where | State size | p50 | p95 | Source |
 |---|---|---|---|---|
-| India (our probe) | ~300-420 tokens, 1 or 10 questions | ~890 ms | ~920 ms | our probe, 2026-09-21 |
-| India | ~7k tokens | ~1,450 ms | ~1,500 ms | our probe, 2026-09-21 |
-| India | ~23k tokens | ~2,030 ms | ~2,040 ms | our probe, 2026-09-21 |
+| India (this repo's probe) | ~300-420 tokens, 1 or 10 questions | ~890 ms | ~920 ms | this repo's probe, 2026-09-21 |
+| India | ~7k tokens | ~1,450 ms | ~1,500 ms | this repo's probe, 2026-09-21 |
+| India | ~23k tokens | ~2,030 ms | ~2,040 ms | this repo's probe, 2026-09-21 |
 | India, Claude Code router test | 2 requests, 94-skill roster | ~0.9-1.0 s | n/a | N-8 (n=8, synthetic, 2026-11-11) |
-| Ellavox worker run | notification batteries | 373 ms | 1,189 ms | Ellavox run, 2026-09-21 |
+| Production worker run (maintainers') | notification batteries | 373 ms | 1,189 ms | production worker run, 2026-09-21 |
 | oh-my-pi (independent) | 39-skill route | ~330 ms | ~372 ms | 2026-09-21 |
 | LiteLLM benchmark (partner) | router classification | 127 ms median | n/a | 2026-09-21 |
 | Japan (independent) | not stated | 1.9-2.4 s range | n/a | 2026-09-21 |
