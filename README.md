@@ -22,6 +22,42 @@ what it leaves out:
 | PRD template | no | `assets/prd-template.md` |
 | Dated facts, failure modes, evidence strength | no | `references/facts.md`, `references/fit-map.md` |
 
+## Where a decision model is the best tool
+
+Evidence as of 2026-11-11: 186 public records, sorted by who ran the test. Only independent results
+are listed as wins below. Shapes and gotchas: `skills/jev/references/use-cases.md`; every source: `docs/research/2026-11-11/evidence.md`.
+
+**Who should use one.** Anyone whose system already asks an LLM to return a label, a yes/no or a
+rating, at volume. If the answer must be written, counted, or reasoned out step by step, keep the LLM.
+If you have thousands of stable labelled examples, train a small classifier first.
+
+**The best-evidenced uses** (independent tests; one number each):
+
+| Use | Result | Source, n |
+|---|---|---|
+| Rerank search results | Recall@5 99.4%, same as Cohere Rerank 3.5, at 60.6% lower cost | erendikmenn, Turkish RAG, n=1,044 questions |
+| Ticket and intent triage | 92.2% vs 93.6% for GPT-6 Luna and Haiku, about 35x cheaper per call | suraj, CLINC150, 3 x 300 tickets per load rate |
+| Cascade in front of a bigger model | kept answers 76.7% -> 84.3% right, with 22.6% sent on | monumei, n=2,319 labelled GitHub issues |
+| Judging other models' output | matched LLM judges in at least 21 of 27 comparisons, 16-357x cheaper | arXiv 2609.29769, 7 benchmarks |
+| Skill routing from a list | 97.6% strict at 126 skills | keta1930, n=500 tasks |
+| Gates inside a coding agent | 180/264 vs 155/264 tasks solved (+9.5 pts) | qybaihe/mu, Terminal-Bench 2.1, 88 tasks x 3 (author also sells a rival judge) |
+
+**Where it loses:**
+- **Prompt injection as the only defence.** 86.35% vs 89.01% for a small deberta classifier that runs in
+  54 ms (Red Hat, 9 public datasets, n not given). At a 1% miss target any gate escalated over 91.8%
+  of inputs (arXiv 2610.20907, n=47,611).
+- **Zero-shot model routing.** "Neither model beats chance" (arXiv 2610.02267, n=13,923).
+- **Trading.** -4.5R vs an LLM's -1.2R over 17 days on a live account (trAIde, 15 trades).
+- **Numbers and broad taste questions.** Numeric medical items 35.9-39.4% (arXiv 2610.18529,
+  n=8,742); "is this test useless?" AUC 0.54 (GC AI, one hackathon).
+
+Its raw confidence runs high: answers scored 0.9-1.0 were right 84.3% of the time, not 98.9%
+(monumei, n=1,794 answers). Calibrate before you trust a cut.
+
+**Alternatives.** OpenAI's Decisions API (GA 2026-10-22) does the same job on gpt-6-luna at $0.10 per
+million input tokens vs Jev's $0.042, with US/EU residency and HIPAA for eligible customers. No
+independent head-to-head was found as of 2026-11-11, so measure both on your own cases.
+
 ## How close can a Jev system get to a frontier model?
 
 Jev cannot be fine-tuned, so the skill moves the intelligence into the question text, the composition
@@ -196,11 +232,27 @@ Read this with care:
 claude plugin marketplace add abhisheksharma001/jev-skill
 claude plugin install jev
 
-# or any Agent Skills host: copy the folder
+# or any Agent Skills host: copy the folder (or symlink it to pick up `git pull` updates)
 cp -r skills/jev ~/.claude/skills/jev
+ln -s "$PWD/skills/jev" ~/.claude/skills/jev
 ```
 
-Scripts need Python 3.9+ with the standard library only. Live calls need `TYPESAFE_API_KEY`.
+Scripts need Python 3.9+ with the standard library only. Nothing in the skill is tied to one user or
+company: every setting comes from the environment.
+
+| Variable | Used by | Default |
+|---|---|---|
+| `TYPESAFE_API_KEY` | all live calls | none (required for live calls; never written to disk by the scripts) |
+| `TYPESAFE_DEFAULT_MODEL` | every script | `jev-1.14.0` (pin a dated id; never `jev-latest`) |
+| `TYPESAFE_BASE_URL` | `jev_client.py` | `https://api.typesafe.ai` |
+| `JEV_ROUTER_MODE` | `claude_code_router.py` | the `mode` file in the data dir (`off` / `shadow` / `on`) |
+| `JEV_ROUTER_HOME` | `claude_code_router.py` | `~/.claude/hooks/jev-router` (mode file, log, skill index) |
+| `JEV_ROUTER_SKILLS` | `claude_code_router.py` | `~/.claude/skills` |
+
+The Claude Code router is optional and off until you add the hook yourself. It sends the first 300
+characters of each prompt, after redaction, to TypeSafe; read
+[`references/claude-code-router.md`](skills/jev/references/claude-code-router.md) and TypeSafe's
+current terms before turning it on for work with client data.
 
 ## Try it
 
@@ -218,6 +270,10 @@ A bounded research run on 2026-09-21 using [research-council](https://github.com
 - About 250 live probe calls on synthetic text.
 - A hostile review pass, whose objections changed five verdicts.
 
+A second run on 2026-11-11 added 186 public records and re-read the vendor docs and terms
+([`docs/research/2026-11-11/evidence.md`](docs/research/2026-11-11/evidence.md)). Some vendor-side rows
+in that run were gathered by a smaller model and are marked unverified where they were not re-read.
+
 Every placement verdict states whether its evidence is independent, partner-sourced, or absent.
 
 Jev launched on 2026-09-15, so all of this is early. Measure on your own cases.
@@ -230,6 +286,8 @@ Jev launched on 2026-09-15, so all of this is early. Measure on your own cases.
   community n8n node.
 - The frontier baseline ran through Claude Code subagents, so it cannot be re-run from an API key;
   its predictions are committed.
+- The Claude Code router was tested on 8 hand-written prompts, agent-labelled (synthetic, direction
+  only); independent routing tests got weaker at 84+ skills. No speed-up is claimed.
 - Not affiliated with TypeSafe AI.
 
 MIT licensed.
