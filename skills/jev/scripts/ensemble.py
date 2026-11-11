@@ -206,7 +206,8 @@ def main(argv=None):
     if n_eval < 30:
         print(f"> WARNING: {n_eval} eval cases. Direction only.\n")
     types = {questions[m]["type"] for m in members}
-    out = {"target": a.target, "model": a.model}
+    seen = sorted({answers[c["id"]].get("model") or a.model for c in cases})
+    out = {"target": a.target, "model": seen[0] if len(seen) == 1 else seen}  # what answered, not what was asked
     if types <= {"noul", "score"}:
         run_binary(rows, members, out)
     elif types == {"choice"}:
