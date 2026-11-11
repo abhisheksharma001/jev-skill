@@ -256,7 +256,8 @@ class RedactionOrder(unittest.TestCase):
     def test_long_input_redacts_fast(self):
         """The hook has a 5 s budget; redaction runs on the whole prompt, so it must stay linear."""
         import time
-        for blob in ("ab.c" * 12500, "a1b2" * 12500, " 1" * 25000):
+        for blob in ("ab.c" * 12500, "a1b2" * 12500, " 1" * 25000, "sk-" * 16667, "pk_x-" * 10000,
+                     "eyJ-" * 12500, "-1" * 25000, "a@" * 25000, "1." * 25000):
             t0 = time.perf_counter()
             router.redact(blob)
             self.assertLess(time.perf_counter() - t0, 0.5)

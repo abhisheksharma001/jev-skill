@@ -45,7 +45,7 @@ INDEX_FILE = DATA / "skill_index.json"
 LOG_FILE = DATA / "log.jsonl"
 MODE_FILE = DATA / "mode"
 VERSION = "v2"
-INDEX_FORMAT = 2  # bump when the cached index content changes (2 = redacted skill text)
+INDEX_FORMAT = 3  # bump when the cached index content changes (3 = whole SKILL.md body redacted before the cut)
 
 MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")  # pinned dated id, never jev-latest; recalibrate when it changes
 URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai") + "/v1/systemone"
@@ -95,8 +95,8 @@ def _key() -> str:
 # ---------- redaction ----------
 _REDACTIONS = [
     (re.compile(r"(?<![\w.+-])[\w.+-]+@[\w-]+\.[\w.-]+"), "<email>"),  # anchored: linear time
-    (re.compile(r"\beyJ[\w-]+\.[\w-]+\.[\w-]*"), "<token>"),  # JWT
-    (re.compile(r"\b(?:(?:sk|pk)[-_](?=[\w-]*\d)[\w-]{16,}|(?:ghp|gho|xox[bp])[-_][A-Za-z0-9_-]{8,}|AKIA[A-Z0-9]{12,})\b"), "<key>"),
+    (re.compile(r"(?<![\w-])eyJ[\w-]+\.[\w-]+\.[\w-]*"), "<token>"),  # JWT
+    (re.compile(r"(?<![\w-])(?:(?:sk|pk)[-_](?=[\w-]{0,200}\d)[\w-]{16,}|(?:ghp|gho|xox[bp])[-_][A-Za-z0-9_-]{8,}|AKIA[A-Z0-9]{12,})\b"), "<key>"),
     (re.compile(r"\b[A-Za-z0-9_-]{32,}\b"), "<token>"),
     (re.compile(r"\+?\d[\d\s().-]{7,}\d"), "<number>"),
     (re.compile(r"\b\d{5,}\b"), "<number>"),
