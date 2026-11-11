@@ -3,6 +3,7 @@
 Run 2026-09-21, model `jev-1.13.0`. "Fable" = Claude Fable 5.1 judging the same held-out cases, labels hidden,
 run through Claude Code subagents (predictions are committed beside this file; not reproducible from an API key).
 Thresholds, weights and escalation cuts were fitted on the train split only. Every number below is held-out.
+Re-run on `jev-1.14.0` (2026-11-11), published next to this file and not replacing it: [results-jev-1.14.0.md](results-jev-1.14.0.md).
 
 ## Voice calls: was this a missed booking? (synthetic, written by a separate agent; held-out n=44)
 
