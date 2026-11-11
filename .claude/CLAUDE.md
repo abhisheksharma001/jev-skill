@@ -8,7 +8,7 @@ Open-source agent skill for TypeSafe AI's Jev decision model. Standard: `~/.clau
 3. Every number in the skill or README names its source and sample size, or is labelled synthetic.
 4. A verdict of GOOD needs independent measured evidence. Vendor or partner-only evidence is never GOOD.
 5. Benchmarks publish held-out numbers only, with n, and say synthetic vs public data.
-6. Pin `jev-1.13.0` in anything with tuned thresholds. Never `jev-latest`.
+6. Pin a dated Jev model id in anything with tuned thresholds; new work pins `jev-1.14.0`. A path tuned on `jev-1.13.0` stays on `jev-1.13.0` until it is recalibrated. Never `jev-latest`.
 7. No client data or PII goes to any API from this repo. Synthetic or public datasets only.
 
 ## Verify

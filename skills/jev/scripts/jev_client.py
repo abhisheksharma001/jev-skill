@@ -8,7 +8,7 @@ calibration runs work before anything is installed.
 
 CLI:
   python3 jev_client.py models
-  python3 jev_client.py ask --state state.txt --questions questions.json [--model jev-1.13.0]
+  python3 jev_client.py ask --state state.txt --questions questions.json [--model jev-1.14.0]
       questions.json is the `questions` object of the API (name -> question).
       state may be a .txt file (sent as a string) or a .json file (sent as structured JSON).
 
@@ -31,9 +31,10 @@ import urllib.request
 
 BASE_URL = os.environ.get("TYPESAFE_BASE_URL", "https://api.typesafe.ai")
 # Pin a dated model for anything with tuned thresholds; `jev-latest` moves.
-DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.13.0")
+# New work defaults to jev-1.14.0; a path tuned on jev-1.13.0 passes --model jev-1.13.0.
+DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")
 USD_PER_M_INPUT = 0.042  # docs.typesafe.ai/models, checked 2026-09-21; output is free
-RETRY_STATUSES = {408, 429, 500, 502, 503, 504}
+RETRY_STATUSES = {408, 429, 500, 502, 503, 504, 529}
 
 
 class JevError(RuntimeError):

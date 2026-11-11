@@ -76,7 +76,7 @@ code, not in the question. Write a default for each; an unknown becomes "default
 
 ## 8. Architecture
 - Seam: `DecisionModel` interface; Jev adapter + <fallback adapter>; fake adapter for tests.
-- Model pinned: `<jev-1.13.0>`; `response.model` logged and alerted on change.
+- Model pinned: `<jev-1.14.0>`; `response.model` logged and alerted on change.
 - Flags: per-path enable, shadow-only mode, kill switch; circuit breaker after <n> consecutive failures.
 - Timeouts <ms>, retries on 408/429/5xx, request size cap <tokens> (well under 64k).
 - Egress guard: <what is blocked or redacted before any call, including shadow>.
@@ -122,4 +122,4 @@ Rollback: flip <flag>. Expected effect within <time>.
 |---|---|---|---|
 | Price | $0.042 per 1M input tokens, output free | docs.typesafe.ai/models | <date> |
 | Context | 64k request / 32k state + longest question | docs.typesafe.ai/models | <date> |
-| Model | jev-1.13.0 | GET /v1/models + response.model | <date> |
+| Model | jev-1.14.0 | GET /v1/models + response.model | <date> |

@@ -120,7 +120,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN an agent reads facts.md THEN every row SHALL name a source and a read date on or after 2026-09-21, and unverified items SHALL be listed as unverified.
 **Verify:** tests pass; `grep -c 'unverified' skills/jev/references/facts.md` >= 1.
 **Must not:** change pins or guidance (S-13, S-14 do that).
-**Status:** built 2026-11-11 in PR #7 (merge pending). Learned: (1) the draft's Haiku-extracted rows were re-read live before writing and five claims changed (jaggedness has exactly 9 modes; the 320 px image anecdote contradicts the documented 280 px minimum; no governing-law clause was found in the MCA, only arbitration in San Francisco; the "0/40 items" consistency claim was not on the page; the old 1,200 requests figure was per minute while the docs now say per second); (2) the step's `grep -c unverified >= 1` check already passed on main, so it proves nothing: a scripted check that every table row ends in a dated source is the real gate; (3) the docs images header `TypeSafe-Danger-Zone-Images: true` and the docs' own "not ready for production" line are live, so S-14 guidance should not recommend images yet.
+**Status:** done 2026-11-11 (PR #7, 153f865). Learned: (1) the draft's Haiku-extracted rows were re-read live before writing and five claims changed (jaggedness has exactly 9 modes; the 320 px image anecdote contradicts the documented 280 px minimum; no governing-law clause was found in the MCA, only arbitration in San Francisco; the "0/40 items" consistency claim was not on the page; the old 1,200 requests figure was per minute while the docs now say per second); (2) the step's `grep -c unverified >= 1` check already passed on main, so it proves nothing: a scripted check that every table row ends in a dated source is the real gate; (3) the docs images header `TypeSafe-Danger-Zone-Images: true` and the docs' own "not ready for production" line are live, so S-14 guidance should not recommend images yet.
 
 ### S-13 — Pin policy: jev-1.14.0 for new work (needs D-3)
 **PR:** one. **Depends on:** D-3, S-12. **Research:** none.
@@ -132,6 +132,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN a script runs with no `--model` and no `TYPESAFE_DEFAULT_MODEL` THEN it SHALL send `jev-1.14.0`; WHEN the API returns 529 THEN `jev_client` SHALL retry with backoff.
 **Verify:** tests pass; break test: remove 529 from `RETRY_STATUSES`, the new retry test fails.
 **Must not:** edit `docs/benchmarks/**`; use `jev-latest` anywhere.
+**Status:** done 2026-11-11 (PR #8). Senior review (fresh opus) found one major, fixed in-PR; merged on Abhishek's go. D-3 answered yes in chat. Learned: (1) 4 script defaults, invariant 6, SKILL.md metadata and rule 5, question-design, integration and the PRD template now say `jev-1.14.0`; a path tuned on `jev-1.13.0` stays on it until recalibrated; (2) `jev_client` retries 529, proved by dropping it (one test fails); (3) not changed, left for a follow-up: `skills/jev/evals/evals.json:18` still asserts an agent "pins a dated model id (jev-1.13.0)", so a correct 1.14.0 answer would grade as a miss; fixed in this PR after the senior review (comment 6799877318) found no step could own it: S-14 and S-20 both forbid editing other checks; the check now says `jev-1.14.0 for new work`; (4) the `/code-review` run found the calibration cache ignores the model, so the new default can relabel 1.13.0 answers as 1.14.0: logged as S-22, not fixed here; `docs/benchmarks/**` and `bench/**` stay 1.13.0 as the step requires.
 
 ### S-14 — Reword the two `other` eval checks (needs D-4)
 **PR:** one. **Depends on:** D-4. **Research:** none. **Model:** sonnet.
@@ -200,6 +201,17 @@ step ports named hunks onto the repo version.
 **PR:** one. **Depends on:** S-13. **Model:** sonnet; spend under $0.50.
 **Senior review:** required — changes published headline numbers.
 **Change:** `bench/score_system.py` with `--model jev-1.14.0`; publish 1.14 next to 1.13, never replacing it.
+
+### S-22 — Calibration cache must not mix model versions; untrack stale ensemble.json
+**PR:** one. **Depends on:** S-13. **Research:** none. **Model:** sonnet. **Confidence:** 0.8.
+**Senior review:** required — changes how calibration answers are reused, which every tuned threshold depends on.
+**Files:** `skills/jev/scripts/calibrate.py` (`get_answers`), `skills/jev/scripts/ensemble.py`, `skills/jev/scripts/optimize_questions.py`, new `tests/test_cache_model.py`, `.gitignore`, `ensemble.json` (remove from git).
+**Locked tests:** `tests/test_scripts.py`, `tests/test_ensemble.py`, `tests/test_optimize.py`, `tests/test_client_retry.py`.
+**Today:** `calibrate.py` `get_answers` keys the cache by case id only, but it reports the model from the cached rows; `ensemble.py:205` writes `--model` as the output's model, so that is where 1.13.0 answers get labelled 1.14.0. After S-13 the default model is `jev-1.14.0`, so a user who reruns on an old 1.13.0 cache without `--model` gets thresholds computed from 1.13.0 answers and reported as 1.14.0 (found by the S-13 code review, 2026-11-11). `ensemble.json` at the repo root (committed in S-2, b26db88) is stale default output that says `jev-1.13.0`.
+**Change:** when a cached row's `model` differs from the requested model, stop with a message naming both (flag `--allow-model-mix` to override and print a warning); `git rm --cached ensemble.json` and add it to `.gitignore`.
+**Acceptance:** WHEN the cache holds rows from `jev-1.13.0` and the run asks for `jev-1.14.0` THEN the script SHALL exit non-zero naming both models; WHEN the models match THEN it SHALL behave as before.
+**Verify:** new tests pass; break test: remove the model check, the mismatch test fails.
+**Must not:** edit existing tests; change any threshold or published number.
 
 ### Owner step (not a PR) — make the installed skill follow the repo
 After S-18 merges: replace `~/.claude/skills/jev` with the plugin install or a symlink to

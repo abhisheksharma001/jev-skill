@@ -15,7 +15,7 @@
         "Splits gradeReply: the 1-5 score can go to Jev, the written explanation stays on an LLM or is made optional",
         "Rollout runs Jev in shadow mode (beside the current call, acting only on the current call) before any cutover",
         "Thresholds come from calibration on labelled cases with a held-out split; 0.5 is not shipped as a default",
-        "Pins a dated model id (jev-1.13.0) instead of jev-latest and mentions watching for version drift",
+        "Pins a dated model id (jev-1.14.0 for new work) instead of jev-latest and mentions watching for version drift",
         "Keeps the existing LLM as fallback for uncertain answers or outages, with a kill switch or flag",
         "Addresses data/PII terms or redaction before ticket text is sent to TypeSafe",
         "The ticket-category Choice question includes an explicit other/none option",
