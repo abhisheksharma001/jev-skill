@@ -68,6 +68,7 @@ TIERS = {
     "everyday": "Ordinary coding or file edits, explaining something, or fixing a bug whose cause the message already shows.",
     "hard": "Designing a new system, debugging with no visible cause, choosing between options with trade-offs, or writing a prompt, rule or guard that must be right.",
 }
+TIER_HINT = os.environ.get("JEV_ROUTER_TIER", "").strip().lower() == "on"  # zero-shot tier hint: log-only unless opted in
 TIER_TO_MODEL = {"lookup": "haiku", "everyday": "sonnet", "hard": "opus"}
 
 
@@ -91,6 +92,7 @@ def _key() -> str:
 # ---------- redaction ----------
 _REDACTIONS = [
     (re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"), "<email>"),
+    (re.compile(r"\beyJ[\w-]+\.[\w-]+\.[\w-]*"), "<token>"),  # JWT
     (re.compile(r"\b(sk|pk|ghp|gho|xox[bp]|AKIA)[-_A-Za-z0-9]{8,}\b"), "<key>"),
     (re.compile(r"\b[A-Za-z0-9_-]{32,}\b"), "<token>"),
     (re.compile(r"\+?\d[\d\s().-]{7,}\d"), "<number>"),
@@ -98,11 +100,15 @@ _REDACTIONS = [
 ]
 
 
-def redact(text: str) -> str:
-    text = text[: MAX_CHARS * 2]
+def redact_all(text: str) -> str:
+    """Redact the whole text. Never cut before redacting: a cut can split a key below the token length."""
     for pat, repl in _REDACTIONS:
         text = pat.sub(repl, text)
-    return text[:MAX_CHARS]
+    return text
+
+
+def redact(text: str) -> str:
+    return redact_all(text)[:MAX_CHARS]
 
 
 # ---------- skill index ----------
@@ -148,8 +154,9 @@ def skill_index() -> dict:
         desc = fm.get("description", "")
         if not desc:
             continue
-        body = re.sub(r"\s+", " ", body).strip()
-        idx[f.parent.name] = {"short": desc[:SHORT_DESC], "full": desc[:FULL_DESC], "body": body[:BODY_CHARS]}
+        desc = redact_all(desc)
+        body = redact_all(re.sub(r"\s+", " ", body).strip()[: BODY_CHARS * 4])[:BODY_CHARS]
+        idx[f.parent.name] = {"short": desc[:SHORT_DESC], "full": desc[:FULL_DESC], "body": body}
     DATA.mkdir(parents=True, exist_ok=True)
     INDEX_FILE.write_text(json.dumps(idx, indent=1, sort_keys=True))
     return idx
@@ -241,7 +248,7 @@ def hint(d: dict) -> str:
         elif len(fitting) >= 2:
             # Near-duplicate skills: each fits, so the rerank Choice splits between them. Name them all.
             parts.append("suggested skills " + " or ".join(f"`{n}`" for n in fitting) + " (several fit)")
-    if d.get("action", 0) >= ACTION_MIN and d["tier_p"] >= HINT_TIER_MIN:
+    if TIER_HINT and d.get("action", 0) >= ACTION_MIN and d["tier_p"] >= HINT_TIER_MIN:
         parts.append(f"helper-agent tier {TIER_TO_MODEL[d['tier']]} (p={d['tier_p']})")
     if not parts:
         return ""

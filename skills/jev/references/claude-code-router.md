@@ -13,7 +13,9 @@ Built and first tested 2026-11-11. **Opt-in, and `shadow` (log only) until you s
 - **Realistic gain:** fewer wrong or needless skill loads, and cheaper helper agents. Claude already
   sees the skill list every turn, so do not promise big speed-ups.
 
-Fit verdict: **GOOD** for skill routing, **HYBRID** for the tier hint (see `fit-map.md`, routing row).
+Fit verdict: **UNKNOWN** (`fit-map.md`, row "Skill hints inside an agent harness": the one independent test, N-6,
+found no gain inside Claude Code). The tier hint is a zero-shot model router, which the fit-map rates
+HYBRID at best, so it stays log-only unless you set `JEV_ROUTER_TIER=on` after calibrating it.
 
 ## How it works (two requests, vendor cookbook method)
 
@@ -31,7 +33,7 @@ prompt --> local filters (off mode, < 15 chars, starts with "/") --> redact + fi
 Why no `none` option: a `none` option competes with real options for probability; the vendor now
 recommends a companion Noul instead (docs.typesafe.ai/patterns/companion-noul). Why one `fits` Noul
 per candidate: near-duplicate skills (two skills that both cover RAG) each fit at ~0.97 while
-the Choice splits 0.57 / 0.43, so the Choice alone would stay silent.
+the Choice splits 0.57 / 0.43 (N-8 run, n=8, synthetic), so the Choice alone would stay silent.
 
 ## Install (opt-in)
 
@@ -79,7 +81,9 @@ means `shadow`; it never defaults to `on`. Skills are read from `~/.claude/skill
 (`facts.md`, data terms: hosting, retention and zero-data-retention are stated there, with dates).
 `shadow` mode sends prompts too; it only withholds the hint. Only `off` sends nothing.
 
-The script sends only the first 300 characters, after replacing emails (`<email>`), phone numbers and
+What leaves the machine on each routed prompt: the first 300 characters of the prompt, every installed
+skill's name and description (up to 220 characters each), and for the top 3 skills up to 600 characters
+of description plus 600 characters of SKILL.md body. All of it is redacted first, by replacing emails (`<email>`), phone numbers and
 runs of 5+ digits (`<number>`), key-like strings (`<key>`) and long opaque tokens (`<token>`). That is a
 filter, not a guarantee: client names, addresses and free-text secrets still pass. If you work with
 client or regulated data, use `off` until someone has read TypeSafe's current terms, or enable it only

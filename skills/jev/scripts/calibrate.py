@@ -35,8 +35,9 @@ DEFAULT_MODEL = os.environ.get("TYPESAFE_DEFAULT_MODEL", "jev-1.14.0")
 
 
 def pick_model(arg):
-    """(model, explicit). Explicit = the user named it via --model or TYPESAFE_DEFAULT_MODEL."""
-    return (arg or DEFAULT_MODEL), bool(arg or os.environ.get("TYPESAFE_DEFAULT_MODEL"))
+    """(model, explicit). Explicit = the user named it with --model on this run.
+    TYPESAFE_DEFAULT_MODEL is a standing default, so it takes the warn path like the built-in one."""
+    return (arg or DEFAULT_MODEL), bool(arg)
 
 
 def split_of(case_id: str, eval_fraction: float) -> str:
@@ -54,7 +55,16 @@ def get_answers(cases, questions, cache_path, offline, model, allow_mix=False, e
     if cache_path and os.path.exists(cache_path):
         for row in load_jsonl(cache_path):
             cache[row["id"]] = row
-    cached_models = sorted({str(cache[c["id"]].get("model")) for c in cases if c["id"] in cache} - {model})
+    cached_models = sorted({str(cache[c["id"]].get("model") or "unknown (no model field)")
+                            for c in cases if c["id"] in cache} - {model})
+    if cached_models and not explicit and not allow_mix and len(cached_models) == 1 \
+            and not cached_models[0].startswith("unknown") \
+            and all(cache[c["id"]].get("model") == cached_models[0] for c in cases if c["id"] in cache):
+        # No --model given and the cache is from one model: keep using it, so the cache never becomes mixed.
+        print(f"WARNING: cache {cache_path} holds answers from {cached_models[0]}; no --model given, so this run "
+              f"uses {cached_models[0]} instead of the default {model}. Pass --model to change.", file=sys.stderr)
+        model = cached_models[0]
+        cached_models = []
     if cached_models:
         msg = (f"cache {cache_path} holds answers from {', '.join(cached_models)} but this run asks for {model}; "
                "mixing model versions gives thresholds that belong to neither")

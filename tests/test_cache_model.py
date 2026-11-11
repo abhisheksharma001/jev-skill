@@ -90,6 +90,36 @@ class CacheModel(unittest.TestCase):
                 self.assertIn(OLD, p.stderr)
                 self.assertIn(NEW, p.stderr)
 
+    def test_env_default_is_not_a_refusal(self):
+        """TYPESAFE_DEFAULT_MODEL is a standing default: an old cache warns, it does not stop the run."""
+        for script, argv in self.calls(OLD, [], "envdefault"):
+            with self.subTest(script=script):
+                env = dict(os.environ, TYPESAFE_DEFAULT_MODEL=NEW)
+                p = subprocess.run([sys.executable, os.path.join(SCRIPTS, script)] + argv,
+                                   capture_output=True, text=True, env=env)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                self.assertIn("WARNING", p.stderr)
+
+    def test_unnamed_default_reuses_cache_model(self):
+        """No --model: the run keeps the cache's own model, so the cache never becomes mixed."""
+        import calibrate
+        sub = os.path.join(self.d, "reuse")
+        os.makedirs(sub)
+        cases, _, cache, _ = write(sub, OLD, n=4)
+        rows = [json.loads(l) for l in open(cases)]
+        rows.append({"id": "new1", "state": "x", "labels": {"q": 1}})
+        fake = lambda state, questions, model: {"model": model, "answers": {"q": {"type": "noul", "noul": 0.9}},
+                                                "usage": {"input_tokens": 1}, "_latency_ms": 0}
+        import jev_client
+        orig = jev_client.ask
+        jev_client.ask = fake
+        try:
+            calibrate.get_answers(rows, Q, cache, False, NEW, explicit=False)
+        finally:
+            jev_client.ask = orig
+        models = {json.loads(l)["model"] for l in open(cache)}
+        self.assertEqual(models, {OLD})
+
     def test_unnamed_default_model_warns_but_proceeds(self):
         """No --model and no env: the built-in default was never asked for, so an old cache is reported, not refused."""
         for script, argv in self.calls(OLD, [], "default"):

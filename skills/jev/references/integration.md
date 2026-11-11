@@ -175,7 +175,7 @@ The decision is only half the design. Specify the action's own rules, in code, n
       terms before production PII. Through Vercel AI Gateway, ZDR and no-training are per-request options.
 - [ ] **Timeouts and retries:** set a client timeout (a near-64k request once stalled silently); retry
       408/429/5xx and 529 ("Overloaded") with backoff.
-- [ ] **Rate limits:** 250k tokens/s and 1,200 req/min at time of writing, "adjusting dynamically".
+- [ ] **Rate limits:** see `facts.md` for the current figures (they change; the vendor says limits adjust dynamically).
       Build backpressure.
 - [ ] **Fallback stays warm:** periodic cheap health call so an outage isn't discovered mid-escalation.
 - [ ] **Keys server-side only.** Never in a browser bundle or a workflow export.

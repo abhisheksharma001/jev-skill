@@ -200,6 +200,11 @@ class Decide(RouterCase):
 
 
 class Hint(unittest.TestCase):
+    def setUp(self):
+        p = mock.patch.object(router, "TIER_HINT", True)  # tier hint is opt-in (JEV_ROUTER_TIER=on)
+        p.start()
+        self.addCleanup(p.stop)
+
     def d(self, **kw):
         base = {"skill": "alpha", "fits": {"alpha": 0.9, "beta": 0.2}, "pick_p": 0.8,
                 "action": 0.9, "tier": "hard", "tier_p": 0.8}
@@ -233,6 +238,43 @@ class Hint(unittest.TestCase):
         self.assertIn("haiku", router.hint(self.d(skill=None, tier="lookup")))
         self.assertEqual(router.hint(self.d(skill=None, action=router.ACTION_MIN - 0.01)), "")
         self.assertEqual(router.hint(self.d(skill=None, tier_p=router.HINT_TIER_MIN - 0.01)), "")
+
+
+class TierOptIn(unittest.TestCase):
+    def test_tier_hint_off_by_default(self):
+        d = {"skill": None, "fits": {}, "pick_p": 0, "action": 0.9, "tier": "hard", "tier_p": 0.9}
+        with mock.patch.object(router, "TIER_HINT", False):
+            self.assertEqual(router.hint(d), "")
+
+
+class RedactionOrder(unittest.TestCase):
+    def test_key_past_the_old_cut_is_not_leaked(self):
+        """Redactions shrink text; a key that straddled a pre-redaction cut must not leak a fragment."""
+        prompt = ("x" * 40 + " ") * 14 + "secretAPIkey_ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"
+        self.assertNotIn("secretAPIkey", router.redact(prompt))
+
+    def test_jwt(self):
+        out = router.redact("auth eyJhbGciOiJI.eyJzdWIiOiIx.abc123 please")
+        self.assertNotIn("eyJ", out)
+
+
+class SkillTextRedacted(RouterCase):
+    def test_index_redacts_skill_descriptions_and_bodies(self):
+        mock.patch.stopall()  # undo RouterCase's fake index; re-patch only the paths below
+        for name, value in (("DATA", self.data), ("INDEX_FILE", self.data / "skill_index.json"),
+                            ("SKILLS_DIR", self.data / "skills")):
+            p = mock.patch.object(router, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        sk = self.data / "skills" / "client-x"
+        sk.mkdir(parents=True)
+        (sk / "SKILL.md").write_text("---\nname: client-x\ndescription: Calls ops@client.example on 4155550132\n---\n"
+                                     "Use token sk-abcdef1234567890 for staging.\n")
+        idx = router.skill_index()
+        blob = json.dumps(idx)
+        for leaked in ("ops@client.example", "4155550132", "sk-abcdef1234567890"):
+            self.assertNotIn(leaked, blob)
+        self.assertIn("<email>", idx["client-x"]["short"])
 
 
 class RouteAndHook(RouterCase):

@@ -35,12 +35,11 @@ If you have thousands of stable labelled examples, train a small classifier firs
 
 | Use | Result | Source, n |
 |---|---|---|
-| Rerank search results | Recall@5 99.4%, same as Cohere Rerank 3.5, at 60.6% lower cost | erendikmenn, Turkish RAG, n=1,044 questions |
+| Rerank search results | Recall@5 99.4%, same as Cohere Rerank 3.5, at 60.6% lower cost | erendikmenn, Turkish RAG, n=1,044 questions (author now marks it legacy/superseded) |
 | Ticket and intent triage | 92.2% vs 93.6% for GPT-6 Luna and Haiku, about 35x cheaper per call | suraj, CLINC150, 3 x 300 tickets per load rate |
 | Cascade in front of a bigger model | kept answers 76.7% -> 84.3% right, with 22.6% sent on | monumei, n=2,319 labelled GitHub issues |
 | Judging other models' output | matched LLM judges in at least 21 of 27 comparisons, 16-357x cheaper | arXiv 2609.29769, 7 benchmarks |
 | Skill routing from a list | 97.6% strict at 126 skills | keta1930, n=500 tasks |
-| Gates inside a coding agent | 180/264 vs 155/264 tasks solved (+9.5 pts) | qybaihe/mu, Terminal-Bench 2.1, 88 tasks x 3 (author also sells a rival judge) |
 
 **Where it loses:**
 - **Prompt injection as the only defence.** 86.35% vs 89.01% for a small deberta classifier that runs in
@@ -243,14 +242,16 @@ company: every setting comes from the environment.
 | Variable | Used by | Default |
 |---|---|---|
 | `TYPESAFE_API_KEY` | all live calls | none (required for live calls; never written to disk by the scripts) |
-| `TYPESAFE_DEFAULT_MODEL` | every script | `jev-1.14.0` (pin a dated id; never `jev-latest`) |
-| `TYPESAFE_BASE_URL` | `jev_client.py` | `https://api.typesafe.ai` |
+| `TYPESAFE_DEFAULT_MODEL` | every script | `jev-1.14.0` (pin a dated id; never `jev-latest`). A standing default: a cache from another model makes calibration reuse that model with a warning; only `--model` refuses a mismatch |
+| `TYPESAFE_BASE_URL` | `jev_client.py`, `claude_code_router.py` (the key is sent there) | `https://api.typesafe.ai` |
 | `JEV_ROUTER_MODE` | `claude_code_router.py` | the `mode` file in the data dir (`off` / `shadow` / `on`) |
 | `JEV_ROUTER_HOME` | `claude_code_router.py` | `~/.claude/hooks/jev-router` (mode file, log, skill index) |
 | `JEV_ROUTER_SKILLS` | `claude_code_router.py` | `~/.claude/skills` |
+| `JEV_ROUTER_TIER` | `claude_code_router.py` | off; `on` adds the helper-tier hint (zero-shot, calibrate first) |
 
-The Claude Code router is optional and off until you add the hook yourself. It sends the first 300
-characters of each prompt, after redaction, to TypeSafe; read
+The Claude Code router is optional and off until you add the hook yourself. On each prompt it sends the
+first 300 characters of the prompt plus your installed skills' descriptions and short SKILL.md
+excerpts, all redacted, to TypeSafe; read
 [`references/claude-code-router.md`](skills/jev/references/claude-code-router.md) and TypeSafe's
 current terms before turning it on for work with client data.
 
