@@ -14,7 +14,7 @@ what it leaves out:
 | | Official skill | This skill |
 |---|---|---|
 | API syntax, pattern catalogue | yes (via live docs) | defers to it |
-| Go / no-go fit check | no | `scripts/fit_check.py` + sourced use-case map (22 placements) |
+| Go / no-go fit check | no | `scripts/fit_check.py` + sourced use-case map (30 placements) |
 | Finding candidates in an existing codebase | no | `scripts/find_decision_calls.py` |
 | Getting accuracy toward a frontier model (question rewriting with a referee, multi-Jev, cascade) | no | `scripts/optimize_questions.py`, `scripts/ensemble.py`, `references/optimization.md` |
 | Calibration method (thresholds, held-out split, three-way bands) | "evaluate on your data" | `scripts/calibrate.py` + `references/calibration.md` |
