@@ -6,8 +6,8 @@ before it goes into a PRD or a cost estimate: fetch `https://docs.typesafe.ai/ll
 serves Markdown when you append `.md`) and `GET /v1/models`.
 
 **What was re-read on 2026-11-11 (live):** the docs pages models, changelog, api/errors, images, box,
-model-jaggedness and legal; the privacy policy, MCA and DPA; the enterprise page; five cookbooks
-(parallel_questions, both consistency ones, classification_using_confidence, skill_suggestion); PyPI and npm
+model-jaggedness and legal; the privacy policy, MCA and DPA; the enterprise page; four cookbooks
+(parallel_questions, consistency_choice_cookbook, classification_using_confidence, skill_suggestion); PyPI and npm
 versions; `gh` for the official skill repo.
 **Not re-read (marked "unverified" where they appear):** third-party integration pages (Zapier, Make, Mastra,
 LiteLLM, Braintrust, Vercel, OpenRouter, Cloudflare, AI/ML API), rival-model pages, independent test reports.
@@ -39,7 +39,7 @@ unverified: extracted by a small model) and https://docs.typesafe.ai/models.md (
 | Model ids | `jev-1.14.0` is newest (2026-10-14). `jev-latest` and `jev-preview` both resolve to `jev-1.14.0` (on 2026-09-21 they resolved to 1.13.0). `jev-1.13.0` is still listed and accepted; this skill still pins `jev-1.13.0` until S-13 decides. `GET /v1/models` lists only the aliases, but dated ids are accepted. Reported: 1.14 vs 1.13 moved +41.6 pts on one phishing set and -3.9 pts on RAGTruth, neither in the release notes | models.md, changelog.md (live 2026-11-11); sammy143/decision-models-eval (N-62, unverified) |
 | Price | **$0.042 per 1M input tokens; output free** (both versions) | models.md (live 2026-11-11) |
 | Price note | Reported, not verified: one independent test found Jev bills ~38% more tokens than SubQ Snap for identical short text; one plugin lists output at $0.13/M against the docs' "free" (question open in typesafe-ai/skills issue #12) | N-62; github.com/typesafe-ai/skills/issues/12 (open, read 2026-11-11) |
-| Rate limits | Set per organisation, measured in tokens per second and requests per second; the docs print no numbers and point to a login-gated console. The 2026-09-21 figures (250,000 tokens/s, 1,200 requests/min) could not be re-verified. Higher limits on custom and enterprise plans | models.md (live 2026-11-11) |
+| Rate limits | Set per organisation, measured in tokens per second and requests per second; the docs print no numbers and point to a login-gated console. The 2026-09-21 figures (250,000 tokens/s, 1,200 requests per **minute**) could not be re-verified, and the docs now state requests per **second**, so do not compare the two or build capacity math on either. Higher limits on custom and enterprise plans | models.md (live 2026-11-11) |
 | Context | 64k per request (state + all questions) and 32k per question (state + one question) by default. Header `TypeSafe-Danger-Zone-Long-Context: true` raises both to 262k on 1.13 and 1.14; same price per token, slower and less accurate | models.md (live 2026-11-11) |
 | Input | Text, a JSON object or an array. PNG and JPEG images on 1.13 and 1.14, but only with header `TypeSafe-Danger-Zone-Images: true` (without it: 400); the docs call images and Box "not yet up to our standards... for production". Each side 280-1568 px; 78,400-2,458,624 total pixels. Audio and video "not natively accept[ed] (yet)" | models.md, images.md (live 2026-11-11) |
 | Languages | English strongest; others (incl. CJK) work less well. The 1.14 release notes say "better multilingual support" (vendor, unmeasured). Reported by independents: 86.7% on Belebele (122 languages) but weaker on low-resource ones (N-78); negation failed in Italian and Portuguese, Arabic and Korean least sure (N-89) | changelog.md (live 2026-11-11); N-78, N-89 (unverified) |
@@ -112,7 +112,7 @@ Independent evidence on option order is mixed and unverified (N-171): about 0 fl
 
 ## Official cookbooks (docs.typesafe.ai/cookbooks/<slug>)
 Source for this table: the cookbook pages, read live 2026-11-11 where the row says "re-read"; other rows were
-read 2026-09-21. The five re-read pages run on `jev-1.14.0`; the Airbnb demo still uses `jev-latest`. Treat
+read 2026-09-21. The four re-read pages run on `jev-1.14.0`; the Airbnb demo still uses `jev-latest`. Treat
 every threshold as an example.
 
 | Slug | What it shows |
