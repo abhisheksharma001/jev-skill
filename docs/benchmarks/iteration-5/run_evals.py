@@ -26,17 +26,20 @@ BASE = None  # set by --base; a nearly empty parent, so an agent that walks up f
 
 def sandbox_profile(work, home):
     """macOS sandbox-exec profile: the agent can read only its own work dir and its own HOME among our files.
-    Blocks the real HOME (the repo, ~/.claude/skills), /private/tmp, the user temp dir and every other run's
-    dirs. ~/Library stays readable (Cursor hangs without it) except app data that holds past chats.
-    Round 5 needed this: an agent grepped the real HOME and read the repo's skill (2026-11-12)."""
-    H, AS = str(Path.home()), str(Path.home() / "Library" / "Application Support")
+    Blocks the real HOME (the repo, ~/.claude/skills), /private/tmp and every other run's dirs. Of ~/Library only
+    Keychains and Preferences stay readable, and of ~/.local only Cursor's install: in round 5 run 2 (2026-11-12)
+    without_skill agents read a Jev project copy under ~/Library/pnpm and past sessions under ~/.local/share.
+    /private/var/folders stays readable: Cursor hangs at start without the user temp dir (tested 2026-11-12);
+    audit.py checks every successful read there."""
+    H = str(Path.home())
     rules = ["(version 1)", "(allow default)",
              f'(deny file-read* (subpath "{H}"))', f'(allow file-read* (literal "{H}"))',
-             f'(allow file-read* (subpath "{H}/Library"))'] + \
-            [f'(deny file-read* (subpath "{AS}/{a}"))' for a in ("Cursor", "Claude", "Code")] + \
-            [f'(deny file-read* (subpath "{H}/Library/Mobile Documents"))',
-             f'(allow file-read* (subpath "{H}/.local"))', f'(allow file-read* (subpath "{H}/.pyenv"))',
-             '(deny file-read* (subpath "/private/tmp"))', '(deny file-read* (subpath "/private/var/folders"))',
+             f'(allow file-read* (literal "{H}/Library"))'] + \
+            [f'(allow file-read* (subpath "{H}/Library/{x}"))' for x in ("Keychains", "Preferences")] + \
+            [f'(allow file-read* (literal "{H}/.local"))', f'(allow file-read* (literal "{H}/.local/share"))',
+             f'(allow file-read* (subpath "{H}/.local/bin"))', f'(allow file-read* (subpath "{H}/.local/share/cursor-agent"))',
+             f'(allow file-read* (subpath "{H}/.pyenv"))',
+             '(deny file-read* (subpath "/private/tmp"))',
              f'(deny file-read* (subpath "{BASE}"))', f'(allow file-read* (literal "{BASE}"))',
              f'(allow file-read* (subpath "{work}"))',
              f'(allow file-read* (subpath "{home}"))',
@@ -123,6 +126,7 @@ def one(ev, config, n, out, model, runner="cursor"):
     shutil.rmtree(work, ignore_errors=True)  # leave no skill copy behind for a later run to find
     if env:
         shutil.rmtree(env["HOME"], ignore_errors=True)
+        prof.unlink(missing_ok=True)
     return run, status
 
 
