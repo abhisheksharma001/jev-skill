@@ -353,6 +353,7 @@ Noise detail: eval 2 check 8, run 2 gave "Phase 1 shadow 14d" with no exit crite
 **Acceptance:** WHEN a reader opens the round-5 results in README or benchmark.md THEN both the original and the regraded mean SHALL appear, with the reason.
 **Verify:** `grep -n "37.7" README.md docs/benchmarks/iteration-5/benchmark.md` prints a line in each; per-run totals summed by hand match; tests pass.
 **Must not:** edit `grading.json` files or eval checks; change round 1-4 numbers.
+**Status:** done 2026-11-12. With-skill totals 39, 36, 39 became 39, 36, 38: mean 38.0 to 37.7, sample sd 1.7 to 1.5 (n = 3; the same sample formula reproduces the original 1.7). Original grades stay visible in README and benchmark.md with a regraded line beside each; `grading.json`, `benchmark.json` and the checks are untouched. Learned: (1) the check is worth 1 point and sits in eval 4 run 3, whose total is 39, so only one run total moves; (2) per-eval counts, pass rate (89%) and the "12 with-skill misses" count in the published tables are still the first-published ones, only the mean and sd were restated; (3) the regrade came from reading one transcript, so other passes may hide the same problem: round 6 grader briefs should say "look for hand-written answer caches".
 
 ### Owner step (not a PR) — make the installed skill follow the repo
 After S-18 merges: replace `~/.claude/skills/jev` with the plugin install or a symlink to
