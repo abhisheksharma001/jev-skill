@@ -255,6 +255,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN an agent reads the quoted benchmark numbers in the skill THEN the model they came from SHALL be named next to them.
 **Verify:** `grep -n "jev-1.13.0" skills/jev/SKILL.md skills/jev/references/optimization.md` shows the new labels; tests pass; `validate_skill.py` passes if available.
 **Must not:** change any number; change non-negotiables.
+**Status:** done 2026-11-12. Learned: the step listed 5 quoted numbers but `SKILL.md:94` also quotes 91.8% and 13%; grep every digit of the benchmark tables, not the list in the step.
 
 ### S-25 — Plan wording: alert on `response.model` change and recalibrate (round-5 eval 1 check 7)
 **PR:** one. **Depends on:** S-24 (same files area; avoids a merge fight on `SKILL.md`). **Blocks:** round 6. **Research:** none.

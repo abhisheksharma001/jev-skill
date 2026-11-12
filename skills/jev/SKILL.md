@@ -93,6 +93,8 @@ On this repo's benchmark a first-draft question scored 84.1% (voice calls) and 7
 A rewrite made after reading the train misses scored 100% and 83.6%, at the same run-time cost. A
 cascade on the 13% least certain Banking77 messages reached 89.6% against 91.8% for the frontier
 model alone. These are small held-out sets, a single run, and the voice set is synthetic.
+All come from the `jev-1.13.0` run (2026-09-21); the `jev-1.14.0` re-run (2026-11-11) moved no setup
+by more than 2.3 points (1 to 3 cases), see `docs/benchmarks/system/results-jev-1.14.0.md` in the repo.
 
 So when accuracy matters:
 1. Get a first result.

@@ -15,6 +15,9 @@ Measured on this repo's benchmark (`docs/benchmarks/system/results.md`, held-out
 | 3. Cascade: frontier model on the unsure share | 100% at 18% escalated | 89.6% at 13%, 91.8% at 32% |
 | Frontier model alone | 100% | 91.8% |
 
+These numbers are from the `jev-1.13.0` run (2026-09-21). The `jev-1.14.0` re-run (2026-11-11) is in
+`docs/benchmarks/system/results-jev-1.14.0.md`; it moved no setup by more than 2.3 points.
+
 ## Lever 1: spend the strong model's intelligence on the question, once
 
 A frontier model is good at reading failures and rewriting wording. Jev is cheap at answering. So
