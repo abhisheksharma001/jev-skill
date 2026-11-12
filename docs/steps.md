@@ -269,6 +269,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN an agent writes a brownfield plan from Recipe A THEN the plan SHALL name the pinned id, say to log `response.model`, and say to alert or recalibrate when it changes.
 **Verify:** `grep -n "alert when it differs from the pin" skills/jev/references/integration.md` prints one line; `grep -n "alert when it changes" skills/jev/SKILL.md` prints one line; `python3 -m unittest discover -s tests` passes. The real test is round 6 (a later eval round, opened as its own step): eval 1 check 7 SHALL pass in at least 2 of 3 with-skill runs, graded blind. Until then this step reports, it does not claim the fix.
 **Must not:** edit eval checks (changing a check is its own step needing senior review); change the pin, the 1.13.0 rule, or any number.
+**Status:** done 2026-11-12, PR pending. Learned: Abhishek approved building under the 0.7 confidence bar on 2026-11-12, knowing the wording is untested. The claim is unproven until round 6 grades eval 1 check 7 (at least 2 of 3 with-skill runs, blind); this step only adds the wording.
 
 ### S-26 — Skill text: a cost share the user asserts is an assumption until the bill is split (round-5 eval 1 check 14)
 **PR:** one. **Depends on:** S-25 (both edit `integration.md` and `SKILL.md`; take them in order). **Blocks:** round 6. **Research:** none.
