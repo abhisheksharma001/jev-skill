@@ -72,7 +72,7 @@ and tell the user the verdict **and how strong the evidence is**. Many placement
 (proposals only). For those, the honest answer is "run a shadow experiment", not yes or no.
 
 A GOOD or HYBRID verdict is a claim that still has to be proved on the user's data, so never end
-one at "good fit". Close each with two lines:
+one at "good fit". Write these two lines under each GOOD or HYBRID item, not once for the whole list:
 - **Prove it:** calibrate on labelled cases and report the held-out split (`references/calibration.md`).
 - **If accuracy is short:** name the lever to pull first (rewrite the question from its train misses,
   multi-Jev, or a cascade on the unsure share; `references/optimization.md`), and say that any

@@ -202,6 +202,17 @@ step ports named hunks onto the repo version.
 **Change:** as S-10's rerun; before the run, move `~/.claude/skills/jev` aside (or say so in the README), per S-10 Must-not and F-14.
 **Acceptance:** S-10's acceptance line.
 **Must not:** edit checks; more than 8 agents at once.
+**Progress 2026-11-11:** owner switched the runner to ChatGPT (Codex CLI 0.167.0, gpt-6.1-sol, high effort, `docs/benchmarks/iteration-5/run_codex.py`, sandbox workspace-write, no network, no key). 24 runs started; 14 finished cleanly, 10 stopped on "Your workspace is out of credits". Audit: one clean without-skill run (mixed-fit-triage run-1) walked up from its work dir, which sat inside the repo, and read README.md and docs/research evidence; discarded ungraded (`skills/jev-workspace/iteration-5-discarded/`). No run read evals.json. Runner fixed: work dirs now outside the repo; only exit-0 runs count or are skipped. 11 runs to redo once credits are refilled; then blind grading (letters, shuffled) and aggregate. Runner change from Sonnet means round 5 is not directly comparable with round 4.
+**Status:** done 2026-11-12. Owner switched the runner again to Cursor Agent CLI (`run_evals.py --runner cursor --model composer-2.5`); Codex credits ran out and Cursor Pro hit its limit on gpt-5.6-sol-high. Result: with skill 39, 36, 39 of 42 (mean 38.0, sd 1.7), without 13, 11, 11 (mean 11.7). **Bar of 40 missed**; the three named checks pass 3/3, 3/3, 2/3, so that half of the acceptance holds. Learned:
+- A temp dir is not isolation. Agents without the skill hunt for Jev material. Across attempts they read:
+  - the repo through a parent work dir;
+  - a sibling run's skill copy;
+  - the real HOME;
+  - a copy of another Jev project under `~/Library/pnpm`.
+  What finally held was per-run dirs deleted after use, plus a `sandbox-exec` read allowlist (only `~/Library/Keychains` and `Preferences`), plus `audit.py`'s LEAK and CONTENT checks. Four leaked runs were discarded and rerun.
+- Cursor hangs at start without the user temp dir. So `/private/var/folders` stays readable, and the audit guards it.
+- Cursor loads `~/.claude/skills` and account plugins by default. A fresh HOME with only `cli-config.json` and the keychain link stops the skills; the plugins still load on both sides.
+- Remaining misses are spread across checks: 4 each in tasks 1 and 2, 3 in task 4, 1 in task 3. A next round should read those misses before it changes any text.
 
 ### S-21 — Re-run the system benchmark on jev-1.14.0
 **PR:** one. **Depends on:** S-13. **Model:** sonnet; spend under $0.50.
