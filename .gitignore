@@ -6,5 +6,6 @@ __pycache__/
 .DS_Store
 *.cache.jsonl
 bench/work/
+bench/work-*/
 .jev_cache/
 /ensemble.json

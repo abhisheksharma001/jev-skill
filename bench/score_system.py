@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 """Score every setup on the SAME held-out cases. Reads cached Jev answers (bench/work) and a
 strong-model prediction file; prints docs/benchmarks/system/results.md content.
-Usage: python3 score_system.py --fable-dir <dir with voice_fable_preds.json, b77_fable_preds.json>"""
+Usage: python3 score_system.py --fable-dir <dir with voice_fable_preds.json, b77_fable_preds.json> [--work <dir>]"""
 import argparse, glob, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "skills", "jev", "scripts"))
 from calibrate import split_of, load_jsonl, fit_noul  # noqa: E402
 import ensemble as E  # noqa: E402
 
-ap = argparse.ArgumentParser(); ap.add_argument("--fable-dir", required=True); a = ap.parse_args()
-W = os.path.join(HERE, "work")
+ap = argparse.ArgumentParser(); ap.add_argument("--fable-dir", required=True)
+ap.add_argument("--work", default=os.path.join(HERE, "work"), help="dir with cases, questions and caches (default bench/work)")
+a = ap.parse_args()
+W = a.work
 USD = 0.042 / 1e6
 
 def cache(path): return {r["id"]: r for r in load_jsonl(path)}
+
+# name the model(s) actually found in every cache under W, so a header can never claim the wrong one
+models = {r.get("model") for f in glob.glob(os.path.join(W, "*.cache.jsonl")) + glob.glob(os.path.join(W, ".jev_cache", "*.cache.jsonl"))
+          for r in load_jsonl(f)}
+print(f"<!-- Jev model found in caches under {W}: {', '.join(sorted(map(str, models)))} -->\n")
 
 # ---------- voice (binary) ----------
 cases = load_jsonl(os.path.join(W, "voice_cases.jsonl"))
