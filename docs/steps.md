@@ -283,6 +283,7 @@ step ports named hunks onto the repo version.
 **Acceptance:** WHEN a user asserts where the money goes and no bill split is in the repo THEN the plan SHALL say the claim is unconfirmed and SHALL ask for the bill split by model or call type.
 **Verify:** `grep -n "bill split" skills/jev/references/integration.md skills/jev/SKILL.md` prints both new lines; tests pass. Skill-text change, so the real test is round 6: eval 1 check 14 SHALL pass in at least 2 of 3 with-skill runs, graded blind; also confirm check 11 (cost estimate with $0.042) still passes, because the estimate must not be dropped.
 **Must not:** edit eval checks; remove or soften "Estimate instead of declining"; change the $0.042 price line.
+**Status:** done 2026-11-13, PR pending. Learned: the skill told the agent to turn missing inputs into assumptions but never said the user's own claim about where the money goes is one of them, and the fixture README repeating that claim read as confirmation. Both new lines name "bill split" so a grep finds them. Real test is round 6 (eval 1 check 14 in at least 2 of 3 runs; check 11 must still pass).
 
 ### S-27 — Skill text: a PRD shows each Noul's true/false text, never "criteria per question-design.md" (round-5 eval 2 check 2)
 **PR:** one. **Depends on:** S-26. **Blocks:** round 6. **Research:** none.

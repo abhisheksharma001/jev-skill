@@ -52,6 +52,9 @@ Goal: replace or pre-screen LLM calls that make *decisions*, without changing be
    the companion Noul ("does any option fit?") that catches input fitting none of them.
 3. **Rank by payoff** = calls/day x tokens x incumbent price. Start with the highest-volume, most
    reversible decision.
+   - A share of the bill that the user or a README asserts (for example 'mostly classifiers') is an
+     assumption, not a fact. Say it cannot be confirmed from the code, give the estimate with it marked
+     as an assumption, and ask for the bill split by model or call type.
 4. **Build a labelled set from history.** Export past inputs plus the outcome you now know was right.
    Aim for 50+ to start, 200+ before publishing accuracy. Redact PII or use synthetic cases until data
    terms are cleared.
