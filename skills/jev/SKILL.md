@@ -205,6 +205,7 @@ about one state go in one call, because state is billed once and question count 
     (calls per day x tokens per call x $0.042 per 1M input tokens, with the check date).
   - Missing inputs become stated assumptions plus "send me X to tighten this", not a refusal. A
     reader can correct a wrong assumption; they cannot act on "it depends".
+  - A stated cost share counts as a missing input: label it, and ask for the bill split.
 - **Decide defaults; do not park them as open questions.**
   - For a rule the user did not specify (business hours, rate limits, retention), write a sensible
     default into the design and list only "confirm the default" as the open item.
