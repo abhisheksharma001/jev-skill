@@ -233,6 +233,29 @@ step ports named hunks onto the repo version.
 **Must not:** edit existing tests; change any threshold or published number.
 **Status:** done 2026-11-11 (combined PR). Learned: the spec's hard stop on a plain default-model rerun conflicts with locked tests that rerun 1.13.0 caches with no --model, so that case warns and proceeds; an explicit --model mismatch exits non-zero; ensemble output now names the model that produced the cached answers, which removes the mislabel either way.
 
+### S-23 — README: label the system benchmark as jev-1.13.0 and summarise the 1.14.0 re-run
+**PR:** one. **Depends on:** S-21. **Research:** none. **Model:** opus (owner asked in-session; docs only).
+**Senior review:** not required — docs only, no number changed, every new number copied from `results-jev-1.14.0.md`.
+**Confidence:** 0.9 — wording only; numbers checked against the published 1.14.0 tables.
+**Files:** `README.md`, `docs/steps.md`.
+**Today:** README "How close can a Jev system get" shows only 2026-09-21 `jev-1.13.0` numbers with no model named and no link to the 1.14.0 re-run, while the skill now pins 1.14.0.
+**Change:** name the model and date above the table; add a short 1.14.0 summary (no measurable change, Voice met, Banking77 misses on accuracy by 0.7 points) and a link to `results-jev-1.14.0.md`.
+**Acceptance:** WHEN a reader opens the README system benchmark THEN it SHALL name the model of the table and link the 1.14.0 results.
+**Verify:** `grep -n "results-jev-1.14.0" README.md` prints a line; `python3 -m unittest discover -s tests` passes.
+**Must not:** change any existing number in README or `docs/benchmarks/`; touch skill text.
+**Status:** done 2026-11-12. Learned: S-21 updated `results.md` but no step owned the README; a step that publishes new headline numbers should list `README.md` in its Files. Same gap remains in skill text: `skills/jev/SKILL.md:92` and `skills/jev/references/optimization.md:12` quote the 1.13.0 numbers without naming the model (S-24).
+
+### S-24 — Skill text: name the model behind the quoted benchmark numbers
+**PR:** one. **Depends on:** S-23. **Research:** none. **Model:** sonnet.
+**Senior review:** not required — wording only, no number changed.
+**Confidence:** 0.85.
+**Files:** `skills/jev/SKILL.md` (line ~92), `skills/jev/references/optimization.md` (line ~12).
+**Today:** both quote 84.1% / 76.1% / 100% / 83.6% / 89.6% from the `jev-1.13.0` run without naming the model; the skill pins `jev-1.14.0`.
+**Change:** add "(on `jev-1.13.0`; the 1.14.0 re-run moved no setup by more than 2.3 points, `docs/benchmarks/system/results-jev-1.14.0.md`)" or equivalent; keep numbers as they are.
+**Acceptance:** WHEN an agent reads the quoted benchmark numbers in the skill THEN the model they came from SHALL be named next to them.
+**Verify:** `grep -n "jev-1.13.0" skills/jev/SKILL.md skills/jev/references/optimization.md` shows the new labels; tests pass; `validate_skill.py` passes if available.
+**Must not:** change any number; change non-negotiables.
+
 ### Owner step (not a PR) — make the installed skill follow the repo
 After S-18 merges: replace `~/.claude/skills/jev` with the plugin install or a symlink to
 `~/jev-skill/skills/jev`, keeping `~/.claude/hooks/jev-router/` (data dir) as is. Move it aside during S-20.

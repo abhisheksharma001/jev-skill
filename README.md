@@ -61,6 +61,8 @@ independent head-to-head was found as of 2026-11-11, so measure both on your own
 
 Jev cannot be fine-tuned, so the skill moves the intelligence into the question text, the composition
 and a cascade. Same held-out cases for every setup; thresholds, weights and cuts fitted on train only.
+The table and chart below are the first run, on `jev-1.13.0` (2026-09-21); the `jev-1.14.0` re-run is
+summarised under them.
 
 ![System benchmark](docs/benchmarks/system/system-benchmark.png)
 
@@ -80,6 +82,16 @@ Goal was "within 3 points of the frontier model while sending it at most 10% of 
 Small sets, single run. Full tables, caveats and reproduction steps are in
 [`docs/benchmarks/system/results.md`](docs/benchmarks/system/results.md). The whole benchmark cost
 about $0.12 of Jev calls.
+
+**Re-run on `jev-1.14.0` (2026-11-11).** Same held-out cases, same question wording (not retuned for
+1.14.0), Jev answers regenerated, thresholds and cuts refitted on train only:
+- No setup's accuracy moved by more than 2.3 points (1 to 3 cases of n=44 or n=134). One run per model,
+  so this is no measurable change on these two tasks, not proof the models are equal.
+- **Voice:** goal still met (multi-Jev 100%, 0% sent).
+- **Banking77:** now misses on accuracy instead of share: 88.1% at 9% sent vs Fable 91.8%, 0.7 points
+  outside the 3-point limit (about 1 case). Neither run clears both limits.
+
+Full side-by-side table: [`docs/benchmarks/system/results-jev-1.14.0.md`](docs/benchmarks/system/results-jev-1.14.0.md).
 
 ## Does the skill change what an agent produces?
 
