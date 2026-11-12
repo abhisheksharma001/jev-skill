@@ -56,6 +56,9 @@ Goal: replace or pre-screen LLM calls that make *decisions*, without changing be
    Aim for 50+ to start, 200+ before publishing accuracy. Redact PII or use synthetic cases until data
    terms are cleared.
 5. **Add the seam** (section 1) behind a flag that defaults to off. No behaviour change yet.
+   - When the deliverable is a plan, write the pin in these words: pin `jev-1.14.0`, never
+     `jev-latest`; log `response.model` on every call; alert when it differs from the pin; recalibrate
+     before trusting thresholds after any change.
 6. **Offline measure.** Run `scripts/calibrate.py` on the labelled set. Run the incumbent on the same
    cases. Compare on the *eval split* only.
    - The script splits cases 70/30 by id. Thresholds are fitted on the train part; every number you
