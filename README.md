@@ -111,6 +111,11 @@ in its own temp dir inside a macOS sandbox, and every transcript was audited for
 | **Total of 42, per run** | **39, 36, 39** | 13, 11, 11 |
 | **Mean (sd)** | **38.0 (sd 1.7)** | 11.7 (sd 1.2) |
 
+- **Regraded after publication:** with-skill mean **37.7 / 42 (sd 1.5)**, totals 39, 36, **38** (n = 3
+  runs; sample sd, as above). The grades above are kept as first published (mean 38.0, sd 1.7). Why: task 4
+  run 3 passed check 1 (train-only misses), but its transcript shows it hand-wrote an answer cache with
+  made-up probabilities and reported the results as measured; that one check is now a fail (-1 point, so
+  task 4 run 3 is 4, not 5). No other grade was re-checked. The bar of 40 is still missed.
 - The three round-4 misses are fixed: `other`/companion option 3 of 3, spam and wrong-number gate
   3 of 3, share escalated per item 2 of 3. The remaining misses are spread over other checks.
 - Four no-skill runs read files outside the sandbox before it was tightened. They were discarded

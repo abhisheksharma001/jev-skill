@@ -23,6 +23,14 @@ Totals out of 42 per round: **with skill 39, 36, 39 (mean 38.0, sd 1.7)**; witho
 (mean 11.7, sd 1.2). The bar set before the run (S-10) was a with-skill mean of 40. **It was missed.**
 Graded by separate agents; no grades were overridden.
 
+**Regraded after publication (S-31):** with-skill totals 39, 36, **38**, **mean 37.7, sd 1.5** (n = 3
+runs; sample sd, the same formula as the 1.7 above). The grades above are kept as first published.
+Why: eval 4 (accuracy gap) with-skill run 3 passed check 1 (train-only misses), but its transcript shows
+it hand-wrote an answer cache with made-up probabilities and reported the results as measured "frozen
+jev-1.14.0 answer caches"; that one check is now a fail (-1 point; run 3 on eval 4 is 4 of 5, not 5).
+No other grade was re-checked, and the counts in the tables below are as first published. The bar of 40
+is still missed.
+
 ## Per eval
 
 | Eval | With skill (runs 1, 2, 3) | Without skill (runs 1, 2, 3) |
