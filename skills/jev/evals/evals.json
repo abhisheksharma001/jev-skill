@@ -72,7 +72,7 @@
         "bench/data/voice_missed_booking.jsonl"
       ],
       "assertions": [
-        "Reads train-only failures via optimize_questions.py misses (does not inspect eval cases)",
+        "Uses the train-only miss review (optimize_questions.py misses) when it can run; if there is no key or cache, says plainly that it was not run and names no eval-split case as a failure it learned from",
         "Reports held-out accuracy before and after with n, thresholds fitted on train",
         "Tries a multi-question ensemble or decomposition and reports whether it helped",
         "Any cascade result states accuracy together with the share of calls escalated",
